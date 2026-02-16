@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS, TETROMINO_KEYS } from './constants';
 import { Board, Piece, GameState } from './types';
 
@@ -38,6 +38,12 @@ export const useTetris = () => {
     gameOver: false,
     isPaused: false,
   });
+  
+  const [showGhost, setShowGhost] = useState(true);
+  
+  // Use ref to avoid resetting the game loop on every state change
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
 
   const isValidMove = useCallback((piece: Piece, board: Board): boolean => {
     for (let y = 0; y < piece.shape.length; y++) {
@@ -103,6 +109,23 @@ export const useTetris = () => {
     });
   }, [isValidMove]);
 
+  const lockPiece = useCallback((prev: GameState): GameState => {
+    if (!prev.currentPiece) return prev;
+    const mergedBoard = mergePieceToBoard(prev.currentPiece, prev.board);
+    const { newBoard, linesCleared } = clearLines(mergedBoard);
+    const newScore = prev.score + calculateScore(linesCleared, prev.level);
+    const newLines = prev.lines + linesCleared;
+    const newLevel = Math.floor(newLines / 10) + 1;
+    return {
+      ...prev,
+      board: newBoard,
+      currentPiece: null,
+      score: newScore,
+      lines: newLines,
+      level: newLevel,
+    };
+  }, [mergePieceToBoard, clearLines]);
+
   const movePiece = useCallback((dx: number, dy: number) => {
     setGameState(prev => {
       if (!prev.currentPiece || prev.gameOver || prev.isPaused) return prev;
@@ -117,23 +140,11 @@ export const useTetris = () => {
         return { ...prev, currentPiece: newPiece };
       }
       if (dy > 0) {
-        const mergedBoard = mergePieceToBoard(prev.currentPiece, prev.board);
-        const { newBoard, linesCleared } = clearLines(mergedBoard);
-        const newScore = prev.score + calculateScore(linesCleared, prev.level);
-        const newLines = prev.lines + linesCleared;
-        const newLevel = Math.floor(newLines / 10) + 1;
-        return {
-          ...prev,
-          board: newBoard,
-          currentPiece: null,
-          score: newScore,
-          lines: newLines,
-          level: newLevel,
-        };
+        return lockPiece(prev);
       }
       return prev;
     });
-  }, [isValidMove, mergePieceToBoard, clearLines]);
+  }, [isValidMove, lockPiece]);
 
   const rotatePiece = useCallback(() => {
     setGameState(prev => {
@@ -157,17 +168,26 @@ export const useTetris = () => {
     });
   }, [isValidMove]);
 
+  const getGhostPosition = useCallback((piece: Piece, board: Board): number => {
+    let ghostY = piece.position.y;
+    while (isValidMove({ ...piece, position: { ...piece.position, y: ghostY + 1 } }, board)) {
+      ghostY++;
+    }
+    return ghostY;
+  }, [isValidMove]);
+
   const hardDrop = useCallback(() => {
     setGameState(prev => {
       if (!prev.currentPiece || prev.gameOver || prev.isPaused) return prev;
-      let newY = prev.currentPiece.position.y;
-      while (isValidMove({ ...prev.currentPiece, position: { ...prev.currentPiece.position, y: newY + 1 } }, prev.board)) {
-        newY++;
-      }
-      const droppedPiece: Piece = { ...prev.currentPiece, position: { ...prev.currentPiece.position, y: newY } };
+      const ghostY = getGhostPosition(prev.currentPiece, prev.board);
+      const dropDistance = ghostY - prev.currentPiece.position.y;
+      const droppedPiece: Piece = { 
+        ...prev.currentPiece, 
+        position: { ...prev.currentPiece.position, y: ghostY } 
+      };
       const mergedBoard = mergePieceToBoard(droppedPiece, prev.board);
       const { newBoard, linesCleared } = clearLines(mergedBoard);
-      const newScore = prev.score + calculateScore(linesCleared, prev.level) + (newY - prev.currentPiece.position.y) * 2;
+      const newScore = prev.score + calculateScore(linesCleared, prev.level) + dropDistance * 2;
       const newLines = prev.lines + linesCleared;
       const newLevel = Math.floor(newLines / 10) + 1;
       return {
@@ -179,10 +199,14 @@ export const useTetris = () => {
         level: newLevel,
       };
     });
-  }, [isValidMove, mergePieceToBoard, clearLines]);
+  }, [getGhostPosition, mergePieceToBoard, clearLines]);
 
   const togglePause = useCallback(() => {
     setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
+  }, []);
+  
+  const toggleGhost = useCallback(() => {
+    setShowGhost(prev => !prev);
   }, []);
 
   const resetGame = useCallback(() => {
@@ -205,13 +229,22 @@ export const useTetris = () => {
     }
   }, [gameState.currentPiece, gameState.gameOver, spawnPiece]);
 
-  // Game loop
+  // Game loop - using ref to prevent reset on piece changes
   useEffect(() => {
-    if (gameState.gameOver || gameState.isPaused || !gameState.currentPiece) return;
+    if (gameState.gameOver || gameState.isPaused) return;
+    
     const speed = Math.max(100, 1000 - (gameState.level - 1) * 100);
-    const interval = setInterval(() => movePiece(0, 1), speed);
+    
+    const tick = () => {
+      const current = gameStateRef.current;
+      if (current.currentPiece && !current.gameOver && !current.isPaused) {
+        movePiece(0, 1);
+      }
+    };
+    
+    const interval = setInterval(tick, speed);
     return () => clearInterval(interval);
-  }, [gameState.gameOver, gameState.isPaused, gameState.level, gameState.currentPiece, movePiece]);
+  }, [gameState.gameOver, gameState.isPaused, gameState.level, movePiece]);
 
   // Keyboard controls
   useEffect(() => {
@@ -246,18 +279,31 @@ export const useTetris = () => {
           e.preventDefault();
           togglePause();
           break;
+        case 'g':
+        case 'G':
+          e.preventDefault();
+          toggleGhost();
+          break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.gameOver, movePiece, rotatePiece, hardDrop, togglePause, resetGame]);
+  }, [gameState.gameOver, movePiece, rotatePiece, hardDrop, togglePause, toggleGhost, resetGame]);
+
+  // Calculate ghost piece position
+  const ghostY = gameState.currentPiece && showGhost
+    ? getGhostPosition(gameState.currentPiece, gameState.board)
+    : null;
 
   return {
     gameState,
+    ghostY,
+    showGhost,
     movePiece,
     rotatePiece,
     hardDrop,
     togglePause,
+    toggleGhost,
     resetGame,
   };
 };

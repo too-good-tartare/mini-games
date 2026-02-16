@@ -4,11 +4,40 @@ import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
 const Tetris: React.FC = () => {
-  const { gameState, movePiece, rotatePiece, hardDrop, togglePause, resetGame } = useTetris();
+  const { 
+    gameState, 
+    ghostY, 
+    showGhost,
+    movePiece, 
+    rotatePiece, 
+    hardDrop, 
+    togglePause, 
+    toggleGhost,
+    resetGame 
+  } = useTetris();
   const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused } = gameState;
 
-  // Create display board with current piece
+  // Create display board with ghost and current piece
   const displayBoard = board.map(row => [...row]);
+  
+  // Draw ghost piece first (so current piece draws on top)
+  if (currentPiece && ghostY !== null && ghostY !== currentPiece.position.y) {
+    for (let y = 0; y < currentPiece.shape.length; y++) {
+      for (let x = 0; x < currentPiece.shape[y].length; x++) {
+        if (currentPiece.shape[y][x]) {
+          const boardY = ghostY + y;
+          const boardX = currentPiece.position.x + x;
+          if (boardY >= 0 && boardY < BOARD_HEIGHT && boardX >= 0 && boardX < BOARD_WIDTH) {
+            if (!displayBoard[boardY][boardX]) {
+              displayBoard[boardY][boardX] = `ghost:${currentPiece.color}`;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Draw current piece
   if (currentPiece) {
     for (let y = 0; y < currentPiece.shape.length; y++) {
       for (let x = 0; x < currentPiece.shape[y].length; x++) {
@@ -24,6 +53,19 @@ const Tetris: React.FC = () => {
   }
 
   const nextPieceShape = TETROMINOS[nextPiece];
+
+  const getCellStyle = (cell: string | null) => {
+    if (!cell) return { backgroundColor: 'transparent' };
+    if (cell.startsWith('ghost:')) {
+      const color = cell.replace('ghost:', '');
+      return {
+        backgroundColor: 'transparent',
+        border: `2px dashed ${color}`,
+        opacity: 0.5,
+      };
+    }
+    return { backgroundColor: cell };
+  };
 
   return (
     <div className="tetris-container">
@@ -86,8 +128,8 @@ const Tetris: React.FC = () => {
               row.map((cell, x) => (
                 <div
                   key={`${y}-${x}`}
-                  className={`tetris-cell ${cell ? 'filled' : ''}`}
-                  style={{ backgroundColor: cell || 'transparent' }}
+                  className={`tetris-cell ${cell && !cell.startsWith('ghost:') ? 'filled' : ''} ${cell?.startsWith('ghost:') ? 'ghost' : ''}`}
+                  style={getCellStyle(cell)}
                 />
               ))
             )}
@@ -138,6 +180,7 @@ const Tetris: React.FC = () => {
               <div>↓ 빠르게</div>
               <div>Space 드롭</div>
               <div>P 일시정지</div>
+              <div>G 가이드</div>
             </div>
           </div>
         </div>
@@ -162,6 +205,16 @@ const Tetris: React.FC = () => {
           </button>
           <button className="ctrl-btn" onClick={() => movePiece(1, 0)}>
             ▶
+          </button>
+        </div>
+        
+        {/* Ghost toggle button */}
+        <div className="controls-row">
+          <button 
+            className={`ctrl-btn ghost-toggle ${showGhost ? 'active' : ''}`} 
+            onClick={toggleGhost}
+          >
+            👻 가이드 {showGhost ? 'ON' : 'OFF'}
           </button>
         </div>
       </div>
