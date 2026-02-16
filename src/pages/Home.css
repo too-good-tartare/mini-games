@@ -1,0 +1,94 @@
+.home-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 40px 20px;
+}
+
+.home-header {
+  text-align: center;
+  color: white;
+  margin-bottom: 50px;
+}
+
+.home-header h1 {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.home-header p {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.game-card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  color: white;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.game-card.coming-soon {
+  opacity: 0.6;
+}
+
+.game-card.coming-soon:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.game-emoji {
+  font-size: 64px;
+  margin-bottom: 15px;
+}
+
+.game-card h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.game-card p {
+  font-size: 14px;
+  opacity: 0.8;
+  margin-bottom: 20px;
+}
+
+.play-btn {
+  display: inline-block;
+  padding: 12px 40px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 25px;
+  font-weight: bold;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.play-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+}
+
+.coming-soon-badge {
+  display: inline-block;
+  padding: 10px 25px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}

@@ -1,17 +1,22 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Home from './pages/Home';
+import Tetris from './games/tetris';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>🎮 미니 게임 사이트</h1>
-        <p>Hello World!</p>
-        <p style={{ fontSize: '1rem', opacity: 0.7 }}>
-          Coming Soon: 테트리스 | 2048 | Fruit Ninja
-        </p>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <nav className="nav-bar">
+          <Link to="/" className="nav-logo">🎮 미니 게임</Link>
+        </nav>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/tetris" element={<Tetris />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
