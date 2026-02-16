@@ -29,8 +29,8 @@ const Game2048: React.FC = () => {
   };
 
   const getTilePosition = (row: number, col: number) => ({
-    top: `calc(${row} * (100% - 24px) / 4 + ${row} * 8px + 6px)`,
-    left: `calc(${col} * (100% - 24px) / 4 + ${col} * 8px + 6px)`
+    top: `calc(${row} * ((100% - 24px) / 4 + 8px))`,
+    left: `calc(${col} * ((100% - 24px) / 4 + 8px))`
   });
 
   return (
