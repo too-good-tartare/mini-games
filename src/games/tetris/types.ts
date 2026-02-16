@@ -20,5 +20,6 @@ export interface GameState {
   level: number;
   gameOver: boolean;
   isPaused: boolean;
-  clearingLines: number[]; // Row indices being cleared
+  clearingLines: number[];
+  isDropping: boolean; // Hard drop animation in progress
 }

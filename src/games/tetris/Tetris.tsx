@@ -5,15 +5,16 @@ import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
 const Tetris: React.FC = () => {
-  const { isMuted, toggleMusic, playLineClear, playGameOver } = useAudio();
+  const { isMuted, toggleMusic, playLineClear, playGameOver, stopMusic, resumeMusic } = useAudio();
   
   const handleLineClear = useCallback((lineCount: number) => {
     playLineClear(lineCount);
   }, [playLineClear]);
 
   const handleGameOver = useCallback(() => {
+    stopMusic();
     playGameOver();
-  }, [playGameOver]);
+  }, [stopMusic, playGameOver]);
 
   const { 
     gameState, 
@@ -26,6 +27,11 @@ const Tetris: React.FC = () => {
     toggleGhost,
     resetGame 
   } = useTetris({ onLineClear: handleLineClear, onGameOver: handleGameOver });
+
+  const handleRestart = useCallback(() => {
+    resetGame();
+    resumeMusic();
+  }, [resetGame, resumeMusic]);
   
   const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused, clearingLines } = gameState;
 
@@ -162,7 +168,7 @@ const Tetris: React.FC = () => {
                     <h2>🎮 게임 오버</h2>
                     <p>최종 점수: {score.toLocaleString()}</p>
                     <p>클리어 라인: {lines}</p>
-                    <button onClick={resetGame}>다시 하기</button>
+                    <button onClick={handleRestart}>다시 하기</button>
                   </>
                 ) : (
                   <>

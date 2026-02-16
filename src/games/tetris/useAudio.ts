@@ -263,10 +263,31 @@ export const useAudio = () => {
     }
   }, [getAudioContext]);
 
+  const stopMusic = useCallback(() => {
+    isPlayingRef.current = false;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = 0;
+    }
+  }, []);
+
+  const resumeMusic = useCallback(() => {
+    if (!isMuted && audioContextRef.current && gainNodeRef.current) {
+      isPlayingRef.current = true;
+      gainNodeRef.current.gain.value = 0.15;
+      scheduleLoop();
+    }
+  }, [isMuted, scheduleLoop]);
+
   return {
     isMuted,
     toggleMusic,
     playLineClear,
     playGameOver,
+    stopMusic,
+    resumeMusic,
   };
 };

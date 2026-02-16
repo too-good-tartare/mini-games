@@ -43,6 +43,7 @@ export const useTetris = ({ onLineClear, onGameOver }: UseTetrisProps = {}) => {
     gameOver: false,
     isPaused: false,
     clearingLines: [],
+    isDropping: false,
   });
   
   const [showGhost, setShowGhost] = useState(true);
@@ -227,39 +228,44 @@ export const useTetris = ({ onLineClear, onGameOver }: UseTetrisProps = {}) => {
 
   const hardDrop = useCallback(() => {
     setGameState(prev => {
-      if (!prev.currentPiece || prev.gameOver || prev.isPaused || prev.clearingLines.length > 0) return prev;
-      const ghostY = getGhostPosition(prev.currentPiece, prev.board);
-      const dropDistance = ghostY - prev.currentPiece.position.y;
-      const droppedPiece: Piece = { 
-        ...prev.currentPiece, 
-        position: { ...prev.currentPiece.position, y: ghostY } 
-      };
-      
-      const mergedBoard = mergePieceToBoard(droppedPiece, prev.board);
-      const completeLines = findCompleteLines(mergedBoard);
-      
-      if (completeLines.length > 0) {
-        if (onLineClearRef.current) {
-          onLineClearRef.current(completeLines.length);
+      if (!prev.currentPiece || prev.gameOver || prev.isPaused || prev.clearingLines.length > 0 || prev.isDropping) return prev;
+      return { ...prev, isDropping: true };
+    });
+  }, []);
+
+  // Hard drop animation loop
+  useEffect(() => {
+    if (!gameState.isDropping || !gameState.currentPiece) return;
+    
+    const dropInterval = setInterval(() => {
+      setGameState(prev => {
+        if (!prev.currentPiece || !prev.isDropping) return prev;
+        
+        const newY = prev.currentPiece.position.y + 1;
+        const newPiece: Piece = {
+          ...prev.currentPiece,
+          position: { ...prev.currentPiece.position, y: newY },
+        };
+        
+        if (isValidMove(newPiece, prev.board)) {
+          return { ...prev, currentPiece: newPiece, score: prev.score + 2 };
         }
         
-        return {
-          ...prev,
-          board: mergedBoard,
-          currentPiece: null,
-          clearingLines: completeLines,
-          score: prev.score + dropDistance * 2,
-        };
-      }
-      
-      return {
-        ...prev,
-        board: mergedBoard,
-        currentPiece: null,
-        score: prev.score + dropDistance * 2,
-      };
-    });
-  }, [getGhostPosition, mergePieceToBoard, findCompleteLines]);
+        // Landed
+        const mergedBoard = mergePieceToBoard(prev.currentPiece, prev.board);
+        const completeLines = findCompleteLines(mergedBoard);
+        
+        if (completeLines.length > 0) {
+          if (onLineClearRef.current) onLineClearRef.current(completeLines.length);
+          return { ...prev, board: mergedBoard, currentPiece: null, clearingLines: completeLines, isDropping: false };
+        }
+        
+        return { ...prev, board: mergedBoard, currentPiece: null, isDropping: false };
+      });
+    }, 20);
+    
+    return () => clearInterval(dropInterval);
+  }, [gameState.isDropping, gameState.currentPiece, isValidMove, mergePieceToBoard, findCompleteLines]);
 
   const togglePause = useCallback(() => {
     setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
@@ -280,6 +286,7 @@ export const useTetris = ({ onLineClear, onGameOver }: UseTetrisProps = {}) => {
       gameOver: false,
       isPaused: false,
       clearingLines: [],
+      isDropping: false,
     });
   }, []);
 
