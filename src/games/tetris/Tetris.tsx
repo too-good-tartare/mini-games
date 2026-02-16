@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTetris } from './useTetris';
+import { useAudio } from './useAudio';
 import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
@@ -15,6 +16,7 @@ const Tetris: React.FC = () => {
     toggleGhost,
     resetGame 
   } = useTetris();
+  const { isMuted, toggleMusic } = useAudio();
   const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused } = gameState;
 
   // Create display board with ghost and current piece
@@ -120,9 +122,14 @@ const Tetris: React.FC = () => {
 
         {/* Game Board */}
         <div className="tetris-board-wrapper">
-          <button className="pause-btn" onClick={togglePause}>
-            {isPaused ? '▶' : '⏸'}
-          </button>
+          <div className="board-top-buttons">
+            <button className="top-btn music-btn" onClick={toggleMusic}>
+              {isMuted ? '🔇' : '🎵'}
+            </button>
+            <button className="top-btn pause-btn" onClick={togglePause}>
+              {isPaused ? '▶' : '⏸'}
+            </button>
+          </div>
           <div className="tetris-board">
             {displayBoard.map((row, y) =>
               row.map((cell, x) => (
