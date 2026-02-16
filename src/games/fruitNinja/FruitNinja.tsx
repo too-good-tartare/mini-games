@@ -353,45 +353,47 @@ const FruitNinja: React.FC = () => {
         <div className="best">👑 {displayState.bestScore}</div>
       </div>
       
-      {displayState.combo > 1 && (
-        <div className="combo">x{displayState.combo} COMBO!</div>
-      )}
-      
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
-        onMouseDown={handleStart}
-        onMouseMove={handleMove}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
-        onTouchStart={handleStart}
-        onTouchMove={handleMove}
-        onTouchEnd={handleEnd}
-      />
-      
-      {!displayState.isPlaying && (
-        <div className="overlay">
-          <div className="overlay-content">
-            {displayState.isGameOver ? (
-              <>
-                <h2>💥 게임 오버!</h2>
-                <p>점수: {displayState.score}</p>
-                <p>최대 콤보: x{displayState.maxCombo}</p>
-              </>
-            ) : (
-              <>
-                <h2>🍉 Fruit Ninja</h2>
-                <p>과일을 스와이프해서 자르세요!</p>
-                <p>💣 폭탄 주의!</p>
-              </>
-            )}
-            <button onClick={startGame}>
-              {displayState.isGameOver ? '다시 하기' : '게임 시작'}
-            </button>
+      <div className="fruit-ninja-game">
+        {displayState.combo > 1 && (
+          <div className="combo">x{displayState.combo} COMBO!</div>
+        )}
+        
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          onMouseDown={handleStart}
+          onMouseMove={handleMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleStart}
+          onTouchMove={handleMove}
+          onTouchEnd={handleEnd}
+        />
+        
+        {!displayState.isPlaying && (
+          <div className="overlay">
+            <div className="overlay-content">
+              {displayState.isGameOver ? (
+                <>
+                  <h2>💥 게임 오버!</h2>
+                  <p>점수: {displayState.score}</p>
+                  <p>최대 콤보: x{displayState.maxCombo}</p>
+                </>
+              ) : (
+                <>
+                  <h2>🍉 Fruit Ninja</h2>
+                  <p>과일을 스와이프해서 자르세요!</p>
+                  <p>💣 폭탄 주의!</p>
+                </>
+              )}
+              <button onClick={startGame}>
+                {displayState.isGameOver ? '다시 하기' : '게임 시작'}
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

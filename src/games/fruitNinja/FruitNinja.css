@@ -4,7 +4,6 @@
   align-items: center;
   padding: 16px;
   max-width: 100%;
-  position: relative;
 }
 
 .fruit-ninja-header {
@@ -14,6 +13,7 @@
   max-width: 400px;
   margin-bottom: 12px;
   font-size: 20px;
+  z-index: 5;
 }
 
 .fruit-ninja-header .score {
@@ -29,9 +29,15 @@
   color: #aaa;
 }
 
+.fruit-ninja-game {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+}
+
 .combo {
   position: absolute;
-  top: 80px;
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 28px;
@@ -40,6 +46,7 @@
   text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   animation: comboPopup 0.3s ease-out;
   z-index: 10;
+  pointer-events: none;
 }
 
 @keyframes comboPopup {
@@ -47,23 +54,22 @@
   100% { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
-.fruit-ninja-container canvas {
+.fruit-ninja-game canvas {
+  display: block;
+  width: 100%;
+  height: auto;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  max-width: 100%;
-  height: auto;
   touch-action: none;
   cursor: crosshair;
 }
 
 .overlay {
   position: absolute;
-  top: 60px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 400px;
-  height: 600px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: rgba(0, 0, 0, 0.85);
   border-radius: 12px;
   display: flex;
@@ -122,10 +128,13 @@
   
   .combo {
     font-size: 22px;
-    top: 60px;
   }
   
-  .overlay {
-    top: 40px;
+  .overlay-content h2 {
+    font-size: 26px;
+  }
+  
+  .overlay-content p {
+    font-size: 16px;
   }
 }
