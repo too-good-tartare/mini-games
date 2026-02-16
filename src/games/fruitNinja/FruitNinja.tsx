@@ -224,10 +224,28 @@ const FruitNinja: React.FC = () => {
       ctx.save();
       ctx.translate(fruit.x, fruit.y);
       ctx.rotate(fruit.rotation);
-      ctx.font = `${fruit.radius * 1.8}px Arial`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(fruit.type.emoji, 0, 0);
+      
+      // 과일/폭탄 그리기 (원형)
+      ctx.beginPath();
+      ctx.arc(0, 0, fruit.radius, 0, Math.PI * 2);
+      ctx.fillStyle = fruit.type.color;
+      ctx.fill();
+      
+      // 하이라이트
+      ctx.beginPath();
+      ctx.arc(-fruit.radius * 0.3, -fruit.radius * 0.3, fruit.radius * 0.25, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fill();
+      
+      // 폭탄 표시
+      if (fruit.isBomb) {
+        ctx.fillStyle = '#ff4444';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💣', 0, 0);
+      }
+      
       ctx.restore();
       
       return true;
@@ -248,19 +266,30 @@ const FruitNinja: React.FC = () => {
       ctx.translate(half.x, half.y);
       ctx.rotate(half.rotation);
       
-      // 클리핑으로 반쪽만 표시
+      // 반원 그리기
       ctx.beginPath();
       if (half.side === 'left') {
-        ctx.rect(-40, -40, 40, 80);
+        ctx.arc(0, 0, 30, Math.PI * 0.5, Math.PI * 1.5);
       } else {
-        ctx.rect(0, -40, 40, 80);
+        ctx.arc(0, 0, 30, -Math.PI * 0.5, Math.PI * 0.5);
       }
-      ctx.clip();
+      ctx.closePath();
       
-      ctx.font = '60px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(half.emoji, 0, 0);
+      // 과일 색상 찾기
+      const fruitType = FRUITS.find(f => f.emoji === half.emoji);
+      ctx.fillStyle = fruitType?.color || '#ff6b6b';
+      ctx.fill();
+      
+      // 과육 표시 (안쪽)
+      ctx.beginPath();
+      if (half.side === 'left') {
+        ctx.arc(5, 0, 22, Math.PI * 0.5, Math.PI * 1.5);
+      } else {
+        ctx.arc(-5, 0, 22, -Math.PI * 0.5, Math.PI * 0.5);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fill();
+      
       ctx.restore();
       
       return true;
