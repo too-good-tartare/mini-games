@@ -4,7 +4,7 @@ import { GRID_SIZE, TILE_COLORS } from './constants';
 import './Game2048.css';
 
 const Game2048: React.FC = () => {
-  const { grid, score, bestScore, gameOver, won, keepPlaying, handleMove, undo, reset, continuePlaying, canUndo, newTilePos, mergedPositions } = use2048({});
+  const { tiles, score, bestScore, gameOver, won, keepPlaying, handleMove, undo, reset, continuePlaying, canUndo } = use2048({});
   
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -28,6 +28,11 @@ const Game2048: React.FC = () => {
     return { backgroundColor: colors.bg, color: colors.text };
   };
 
+  const getTilePosition = (row: number, col: number) => ({
+    top: `calc(${row} * (100% - 24px) / 4 + ${row} * 8px + 6px)`,
+    left: `calc(${col} * (100% - 24px) / 4 + ${col} * 8px + 6px)`
+  });
+
   return (
     <div className="game2048-container">
       <div className="game2048-header">
@@ -48,20 +53,18 @@ const Game2048: React.FC = () => {
           {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, i) => <div key={i} className="cell-bg" />)}
         </div>
         <div className="tiles">
-          {grid.map((row, r) => row.map((cell, c) => {
-            if (!cell) return null;
-            const isNew = newTilePos && newTilePos[0] === r && newTilePos[1] === c;
-            const isMerged = mergedPositions.some(([mr, mc]) => mr === r && mc === c);
-            return (
-              <div key={`${r}-${c}`} className={`tile${isNew ? ' new' : ''}${isMerged ? ' merged' : ''}`} style={{ 
-                ...getTileStyle(cell), 
-                top: `calc(${r} * (100% - 24px) / 4 + ${r} * 8px)`,
-                left: `calc(${c} * (100% - 24px) / 4 + ${c} * 8px)`
-              }}>
-                {cell}
-              </div>
-            );
-          }))}
+          {tiles.map((tile) => (
+            <div 
+              key={tile.id} 
+              className={`tile${tile.isNew ? ' new' : ''}${tile.isMerged ? ' merged' : ''}`} 
+              style={{ 
+                ...getTileStyle(tile.value), 
+                ...getTilePosition(tile.row, tile.col)
+              }}
+            >
+              {tile.value}
+            </div>
+          ))}
         </div>
         
         {(gameOver || (won && !keepPlaying)) && (

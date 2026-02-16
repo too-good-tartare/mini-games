@@ -1,114 +1,182 @@
 import { useState, useCallback, useEffect } from 'react';
 import { GRID_SIZE, WIN_VALUE, STORAGE_KEY } from './constants';
 
-type Grid = (number | null)[][];
+export interface Tile {
+  id: number;
+  value: number;
+  row: number;
+  col: number;
+  isNew?: boolean;
+  isMerged?: boolean;
+  prevRow?: number;
+  prevCol?: number;
+}
 
 interface GameState {
-  grid: Grid;
+  tiles: Tile[];
   score: number;
   bestScore: number;
   gameOver: boolean;
   won: boolean;
   keepPlaying: boolean;
-  prevGrid: Grid | null;
+  prevTiles: Tile[] | null;
   prevScore: number;
-  newTilePos: [number, number] | null;
-  mergedPositions: [number, number][];
 }
 
-const createEmptyGrid = (): Grid =>
-  Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(null));
+const getOccupiedCells = (tiles: Tile[]): Set<string> => {
+  const set = new Set<string>();
+  tiles.forEach(t => set.add(`${t.row},${t.col}`));
+  return set;
+};
 
-const getEmptyCells = (grid: Grid): [number, number][] => {
+const getEmptyCells = (tiles: Tile[]): [number, number][] => {
+  const occupied = getOccupiedCells(tiles);
   const empty: [number, number][] = [];
-  grid.forEach((row, r) => row.forEach((cell, c) => { if (!cell) empty.push([r, c]); }));
+  for (let r = 0; r < GRID_SIZE; r++) {
+    for (let c = 0; c < GRID_SIZE; c++) {
+      if (!occupied.has(`${r},${c}`)) empty.push([r, c]);
+    }
+  }
   return empty;
 };
 
-const addRandomTile = (grid: Grid): { grid: Grid; pos: [number, number] | null } => {
-  const empty = getEmptyCells(grid);
-  if (empty.length === 0) return { grid, pos: null };
+let nextTileId = 1;
+const createTile = (row: number, col: number, value: number, isNew = false): Tile => ({
+  id: nextTileId++,
+  value,
+  row,
+  col,
+  isNew,
+  isMerged: false,
+});
+
+const addRandomTile = (tiles: Tile[]): { tiles: Tile[]; newTile: Tile | null } => {
+  const empty = getEmptyCells(tiles);
+  if (empty.length === 0) return { tiles, newTile: null };
   const [r, c] = empty[Math.floor(Math.random() * empty.length)];
-  const newGrid = grid.map(row => [...row]);
-  newGrid[r][c] = Math.random() < 0.9 ? 2 : 4;
-  return { grid: newGrid, pos: [r, c] };
+  const newTile = createTile(r, c, Math.random() < 0.9 ? 2 : 4, true);
+  return { tiles: [...tiles, newTile], newTile };
 };
 
-const rotateGrid = (grid: Grid): Grid => {
-  const n = GRID_SIZE;
-  return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => grid[n - 1 - j][i]));
-};
+type Direction = 'left' | 'right' | 'up' | 'down';
 
-const slideLeft = (grid: Grid): { grid: Grid; score: number; moved: boolean; mergedCols: number[][] } => {
+const moveTiles = (tiles: Tile[], direction: Direction): { tiles: Tile[]; score: number; moved: boolean } => {
+  // Clear animation flags and store previous positions
+  let newTiles = tiles.map(t => ({ 
+    ...t, 
+    isNew: false, 
+    isMerged: false,
+    prevRow: t.row,
+    prevCol: t.col
+  }));
+  
   let score = 0;
   let moved = false;
-  const mergedCols: number[][] = [];
-  const newGrid = grid.map((row, rowIdx) => {
-    const filtered = row.filter(x => x !== null) as number[];
-    const merged: number[] = [];
-    const rowMergedCols: number[] = [];
-    let i = 0;
-    while (i < filtered.length) {
-      if (i + 1 < filtered.length && filtered[i] === filtered[i + 1]) {
-        const val = filtered[i] * 2;
-        merged.push(val);
-        rowMergedCols.push(merged.length - 1);
-        score += val;
-        i += 2;
-      } else {
-        merged.push(filtered[i]);
-        i++;
+  
+  // Determine sort order and movement axis
+  const isHorizontal = direction === 'left' || direction === 'right';
+  const isReverse = direction === 'right' || direction === 'down';
+  
+  // Group tiles by row (horizontal) or column (vertical)
+  const groups: Map<number, Tile[]> = new Map();
+  newTiles.forEach(tile => {
+    const key = isHorizontal ? tile.row : tile.col;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key)!.push(tile);
+  });
+  
+  const resultTiles: Tile[] = [];
+  const tilesToRemove = new Set<number>();
+  
+  groups.forEach((groupTiles, lineIndex) => {
+    // Sort tiles in the line
+    groupTiles.sort((a, b) => {
+      const aPos = isHorizontal ? a.col : a.row;
+      const bPos = isHorizontal ? b.col : b.row;
+      return isReverse ? bPos - aPos : aPos - bPos;
+    });
+    
+    let targetPos = isReverse ? GRID_SIZE - 1 : 0;
+    const step = isReverse ? -1 : 1;
+    
+    for (let i = 0; i < groupTiles.length; i++) {
+      const tile = groupTiles[i];
+      const nextTile = groupTiles[i + 1];
+      
+      // Check for merge
+      if (nextTile && tile.value === nextTile.value && !tilesToRemove.has(tile.id)) {
+        // Merge: tile absorbs nextTile
+        const newValue = tile.value * 2;
+        score += newValue;
+        
+        // Update tile position and value
+        if (isHorizontal) {
+          if (tile.col !== targetPos) moved = true;
+          tile.col = targetPos;
+        } else {
+          if (tile.row !== targetPos) moved = true;
+          tile.row = targetPos;
+        }
+        tile.value = newValue;
+        tile.isMerged = true;
+        
+        // Move nextTile to same position (for animation) then mark for removal
+        if (isHorizontal) {
+          nextTile.col = targetPos;
+        } else {
+          nextTile.row = targetPos;
+        }
+        tilesToRemove.add(nextTile.id);
+        moved = true;
+        
+        resultTiles.push(tile);
+        i++; // Skip next tile
+        targetPos += step;
+      } else if (!tilesToRemove.has(tile.id)) {
+        // Just move
+        const oldPos = isHorizontal ? tile.col : tile.row;
+        if (isHorizontal) {
+          tile.col = targetPos;
+        } else {
+          tile.row = targetPos;
+        }
+        if (oldPos !== targetPos) moved = true;
+        resultTiles.push(tile);
+        targetPos += step;
       }
     }
-    while (merged.length < GRID_SIZE) merged.push(null as any);
-    if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
-    mergedCols.push(rowMergedCols);
-    return merged;
   });
-  return { grid: newGrid, score, moved, mergedCols };
+  
+  return { 
+    tiles: resultTiles.filter(t => !tilesToRemove.has(t.id)), 
+    score, 
+    moved 
+  };
 };
 
-const transformMergedPositions = (mergedCols: number[][], rot: number): [number, number][] => {
-  const positions: [number, number][] = [];
-  mergedCols.forEach((cols, row) => {
-    cols.forEach(col => {
-      let r = row, c = col;
-      // Reverse the rotation to get original position
-      for (let i = 0; i < (4 - rot) % 4; i++) {
-        const newR = c;
-        const newC = GRID_SIZE - 1 - r;
-        r = newR;
-        c = newC;
-      }
-      positions.push([r, c]);
-    });
-  });
-  return positions;
-};
-
-const move = (grid: Grid, direction: string): { grid: Grid; score: number; moved: boolean; mergedPositions: [number, number][] } => {
-  let g = grid;
-  const rotations: Record<string, number> = { left: 0, up: 1, right: 2, down: 3 };
-  const rot = rotations[direction];
-  for (let i = 0; i < rot; i++) g = rotateGrid(g);
-  const result = slideLeft(g);
-  for (let i = 0; i < (4 - rot) % 4; i++) result.grid = rotateGrid(result.grid);
-  const mergedPositions = transformMergedPositions(result.mergedCols, rot);
-  return { grid: result.grid, score: result.score, moved: result.moved, mergedPositions };
-};
-
-const canMove = (grid: Grid): boolean => {
-  if (getEmptyCells(grid).length > 0) return true;
+const canMove = (tiles: Tile[]): boolean => {
+  if (getEmptyCells(tiles).length > 0) return true;
+  
+  // Check for possible merges
+  const grid: (number | null)[][] = Array.from({ length: GRID_SIZE }, () => 
+    Array(GRID_SIZE).fill(null)
+  );
+  tiles.forEach(t => { grid[t.row][t.col] = t.value; });
+  
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
       const val = grid[r][c];
-      if ((c < GRID_SIZE - 1 && grid[r][c + 1] === val) || (r < GRID_SIZE - 1 && grid[r + 1][c] === val)) return true;
+      if (val === null) continue;
+      if ((c < GRID_SIZE - 1 && grid[r][c + 1] === val) || 
+          (r < GRID_SIZE - 1 && grid[r + 1][c] === val)) {
+        return true;
+      }
     }
   }
   return false;
 };
 
-const hasWon = (grid: Grid): boolean => grid.some(row => row.some(cell => cell === WIN_VALUE));
+const hasWon = (tiles: Tile[]): boolean => tiles.some(t => t.value === WIN_VALUE);
 
 interface Use2048Props {
   onMove?: () => void;
@@ -117,49 +185,92 @@ interface Use2048Props {
   onGameOver?: () => void;
 }
 
+const initGame = (): { tiles: Tile[]; bestScore: number } => {
+  const bestScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+  let tiles: Tile[] = [];
+  const first = addRandomTile(tiles);
+  const second = addRandomTile(first.tiles);
+  return { tiles: second.tiles, bestScore };
+};
+
 export const use2048 = ({ onMove, onMerge, onWin, onGameOver }: Use2048Props = {}) => {
   const [state, setState] = useState<GameState>(() => {
-    const bestScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
-    let grid = createEmptyGrid();
-    const first = addRandomTile(grid);
-    const second = addRandomTile(first.grid);
-    return { grid: second.grid, score: 0, bestScore, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0, newTilePos: second.pos, mergedPositions: [] };
+    const { tiles, bestScore } = initGame();
+    return { 
+      tiles, 
+      score: 0, 
+      bestScore, 
+      gameOver: false, 
+      won: false, 
+      keepPlaying: false, 
+      prevTiles: null, 
+      prevScore: 0 
+    };
   });
 
-  const handleMove = useCallback((direction: string) => {
+  const handleMove = useCallback((direction: Direction) => {
     setState(prev => {
       if (prev.gameOver || (prev.won && !prev.keepPlaying)) return prev;
-      const { grid: newGrid, score: addedScore, moved, mergedPositions } = move(prev.grid, direction);
+      
+      const { tiles: movedTiles, score: addedScore, moved } = moveTiles(prev.tiles, direction);
       if (!moved) return prev;
       
       onMove?.();
       if (addedScore > 0) onMerge?.(addedScore);
       
-      const { grid: gridWithNew, pos: newTilePos } = addRandomTile(newGrid);
+      const { tiles: tilesWithNew } = addRandomTile(movedTiles);
       const newScore = prev.score + addedScore;
       const newBest = Math.max(newScore, prev.bestScore);
       
-      if (newBest > prev.bestScore) localStorage.setItem(STORAGE_KEY, String(newBest));
+      if (newBest > prev.bestScore) {
+        localStorage.setItem(STORAGE_KEY, String(newBest));
+      }
       
-      const won = !prev.won && hasWon(gridWithNew);
+      const won = !prev.won && hasWon(tilesWithNew);
       if (won) onWin?.();
       
-      const gameOver = !canMove(gridWithNew);
+      const gameOver = !canMove(tilesWithNew);
       if (gameOver) onGameOver?.();
       
-      return { ...prev, grid: gridWithNew, score: newScore, bestScore: newBest, won: prev.won || won, gameOver, prevGrid: prev.grid, prevScore: prev.score, newTilePos, mergedPositions };
+      return { 
+        ...prev, 
+        tiles: tilesWithNew, 
+        score: newScore, 
+        bestScore: newBest, 
+        won: prev.won || won, 
+        gameOver, 
+        prevTiles: prev.tiles, 
+        prevScore: prev.score 
+      };
     });
   }, [onMove, onMerge, onWin, onGameOver]);
 
   const undo = useCallback(() => {
-    setState(prev => prev.prevGrid ? { ...prev, grid: prev.prevGrid, score: prev.prevScore, prevGrid: null, gameOver: false } : prev);
+    setState(prev => {
+      if (!prev.prevTiles) return prev;
+      return { 
+        ...prev, 
+        tiles: prev.prevTiles, 
+        score: prev.prevScore, 
+        prevTiles: null, 
+        gameOver: false 
+      };
+    });
   }, []);
 
   const reset = useCallback(() => {
-    let grid = createEmptyGrid();
-    const first = addRandomTile(grid);
-    const second = addRandomTile(first.grid);
-    setState(prev => ({ ...prev, grid: second.grid, score: 0, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0, newTilePos: second.pos, mergedPositions: [] }));
+    nextTileId = 1;
+    const { tiles } = initGame();
+    setState(prev => ({ 
+      ...prev, 
+      tiles, 
+      score: 0, 
+      gameOver: false, 
+      won: false, 
+      keepPlaying: false, 
+      prevTiles: null, 
+      prevScore: 0 
+    }));
   }, []);
 
   const continuePlaying = useCallback(() => {
@@ -168,13 +279,29 @@ export const use2048 = ({ onMove, onMerge, onWin, onGameOver }: Use2048Props = {
 
   // Keyboard controls
   useEffect(() => {
-    const keyMap: Record<string, string> = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+    const keyMap: Record<string, Direction> = { 
+      ArrowUp: 'up', 
+      ArrowDown: 'down', 
+      ArrowLeft: 'left', 
+      ArrowRight: 'right' 
+    };
     const handleKey = (e: KeyboardEvent) => {
-      if (keyMap[e.key]) { e.preventDefault(); handleMove(keyMap[e.key]); }
+      const dir = keyMap[e.key];
+      if (dir) { 
+        e.preventDefault(); 
+        handleMove(dir); 
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [handleMove]);
 
-  return { ...state, handleMove, undo, reset, continuePlaying, canUndo: !!state.prevGrid };
+  return { 
+    ...state, 
+    handleMove, 
+    undo, 
+    reset, 
+    continuePlaying, 
+    canUndo: !!state.prevTiles 
+  };
 };

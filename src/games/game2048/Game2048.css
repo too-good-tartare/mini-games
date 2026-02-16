@@ -102,7 +102,7 @@
   border-radius: 4px;
   width: calc((100% - 24px) / 4);
   height: calc((100% - 24px) / 4);
-  transition: top 0.12s ease-out, left 0.12s ease-out;
+  transition: top 0.15s ease-out, left 0.15s ease-out;
 }
 
 .tile.new {
