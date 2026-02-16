@@ -376,8 +376,12 @@ const FruitNinja: React.FC = () => {
       <div className="fruit-ninja-header">
         <div className="score">🎯 {displayState.score}</div>
         <div className="lives">
-          {'❤️'.repeat(displayState.lives)}
-          {'🖤'.repeat(INITIAL_LIVES - displayState.lives)}
+          {Array.from({ length: displayState.lives }).map((_, i) => (
+            <span key={i} className="heart full">♥</span>
+          ))}
+          {Array.from({ length: INITIAL_LIVES - displayState.lives }).map((_, i) => (
+            <span key={i + displayState.lives} className="heart empty">♥</span>
+          ))}
         </div>
         <div className="best">👑 {displayState.bestScore}</div>
       </div>

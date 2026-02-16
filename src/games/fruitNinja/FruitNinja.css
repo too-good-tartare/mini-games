@@ -23,6 +23,20 @@
 
 .fruit-ninja-header .lives {
   font-size: 18px;
+  display: flex;
+  gap: 2px;
+}
+
+.heart {
+  font-size: 20px;
+}
+
+.heart.full {
+  color: #ff4757;
+}
+
+.heart.empty {
+  color: #555;
 }
 
 .fruit-ninja-header .best {
