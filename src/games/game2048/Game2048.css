@@ -90,12 +90,10 @@
 .tiles {
   position: absolute;
   top: 8px; left: 8px; right: 8px; bottom: 8px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
 }
 
 .tile {
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,6 +101,8 @@
   font-weight: bold;
   border-radius: 4px;
   animation: pop 0.15s ease;
+  width: calc((100% - 24px) / 4);
+  height: calc((100% - 24px) / 4);
 }
 
 @keyframes pop {

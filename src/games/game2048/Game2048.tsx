@@ -49,7 +49,11 @@ const Game2048: React.FC = () => {
         </div>
         <div className="tiles">
           {grid.map((row, r) => row.map((cell, c) => cell && (
-            <div key={`${r}-${c}`} className="tile" style={{ ...getTileStyle(cell), gridRow: r + 1, gridColumn: c + 1 }}>
+            <div key={`${r}-${c}`} className="tile" style={{ 
+              ...getTileStyle(cell), 
+              top: `calc(${r} * (100% - 24px) / 4 + ${r} * 8px)`,
+              left: `calc(${c} * (100% - 24px) / 4 + ${c} * 8px)`
+            }}>
               {cell}
             </div>
           )))}
