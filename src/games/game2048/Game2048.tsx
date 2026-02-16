@@ -4,7 +4,7 @@ import { GRID_SIZE, TILE_COLORS } from './constants';
 import './Game2048.css';
 
 const Game2048: React.FC = () => {
-  const { grid, score, bestScore, gameOver, won, keepPlaying, handleMove, undo, reset, continuePlaying, canUndo } = use2048({});
+  const { grid, score, bestScore, gameOver, won, keepPlaying, handleMove, undo, reset, continuePlaying, canUndo, newTilePos, mergedPositions } = use2048({});
   
   const touchStart = useRef<{ x: number; y: number } | null>(null);
 
@@ -48,15 +48,20 @@ const Game2048: React.FC = () => {
           {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, i) => <div key={i} className="cell-bg" />)}
         </div>
         <div className="tiles">
-          {grid.map((row, r) => row.map((cell, c) => cell && (
-            <div key={`${r}-${c}`} className="tile" style={{ 
-              ...getTileStyle(cell), 
-              top: `calc(${r} * (100% - 24px) / 4 + ${r} * 8px)`,
-              left: `calc(${c} * (100% - 24px) / 4 + ${c} * 8px)`
-            }}>
-              {cell}
-            </div>
-          )))}
+          {grid.map((row, r) => row.map((cell, c) => {
+            if (!cell) return null;
+            const isNew = newTilePos && newTilePos[0] === r && newTilePos[1] === c;
+            const isMerged = mergedPositions.some(([mr, mc]) => mr === r && mc === c);
+            return (
+              <div key={`${r}-${c}`} className={`tile${isNew ? ' new' : ''}${isMerged ? ' merged' : ''}`} style={{ 
+                ...getTileStyle(cell), 
+                top: `calc(${r} * (100% - 24px) / 4 + ${r} * 8px)`,
+                left: `calc(${c} * (100% - 24px) / 4 + ${c} * 8px)`
+              }}>
+                {cell}
+              </div>
+            );
+          }))}
         </div>
         
         {(gameOver || (won && !keepPlaying)) && (

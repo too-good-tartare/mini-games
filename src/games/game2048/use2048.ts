@@ -12,6 +12,8 @@ interface GameState {
   keepPlaying: boolean;
   prevGrid: Grid | null;
   prevScore: number;
+  newTilePos: [number, number] | null;
+  mergedPositions: [number, number][];
 }
 
 const createEmptyGrid = (): Grid =>
@@ -23,13 +25,13 @@ const getEmptyCells = (grid: Grid): [number, number][] => {
   return empty;
 };
 
-const addRandomTile = (grid: Grid): Grid => {
+const addRandomTile = (grid: Grid): { grid: Grid; pos: [number, number] | null } => {
   const empty = getEmptyCells(grid);
-  if (empty.length === 0) return grid;
+  if (empty.length === 0) return { grid, pos: null };
   const [r, c] = empty[Math.floor(Math.random() * empty.length)];
   const newGrid = grid.map(row => [...row]);
   newGrid[r][c] = Math.random() < 0.9 ? 2 : 4;
-  return newGrid;
+  return { grid: newGrid, pos: [r, c] };
 };
 
 const rotateGrid = (grid: Grid): Grid => {
@@ -37,17 +39,20 @@ const rotateGrid = (grid: Grid): Grid => {
   return Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => grid[n - 1 - j][i]));
 };
 
-const slideLeft = (grid: Grid): { grid: Grid; score: number; moved: boolean } => {
+const slideLeft = (grid: Grid): { grid: Grid; score: number; moved: boolean; mergedCols: number[][] } => {
   let score = 0;
   let moved = false;
-  const newGrid = grid.map(row => {
+  const mergedCols: number[][] = [];
+  const newGrid = grid.map((row, rowIdx) => {
     const filtered = row.filter(x => x !== null) as number[];
     const merged: number[] = [];
+    const rowMergedCols: number[] = [];
     let i = 0;
     while (i < filtered.length) {
       if (i + 1 < filtered.length && filtered[i] === filtered[i + 1]) {
         const val = filtered[i] * 2;
         merged.push(val);
+        rowMergedCols.push(merged.length - 1);
         score += val;
         i += 2;
       } else {
@@ -57,19 +62,39 @@ const slideLeft = (grid: Grid): { grid: Grid; score: number; moved: boolean } =>
     }
     while (merged.length < GRID_SIZE) merged.push(null as any);
     if (JSON.stringify(merged) !== JSON.stringify(row)) moved = true;
+    mergedCols.push(rowMergedCols);
     return merged;
   });
-  return { grid: newGrid, score, moved };
+  return { grid: newGrid, score, moved, mergedCols };
 };
 
-const move = (grid: Grid, direction: string): { grid: Grid; score: number; moved: boolean } => {
+const transformMergedPositions = (mergedCols: number[][], rot: number): [number, number][] => {
+  const positions: [number, number][] = [];
+  mergedCols.forEach((cols, row) => {
+    cols.forEach(col => {
+      let r = row, c = col;
+      // Reverse the rotation to get original position
+      for (let i = 0; i < (4 - rot) % 4; i++) {
+        const newR = c;
+        const newC = GRID_SIZE - 1 - r;
+        r = newR;
+        c = newC;
+      }
+      positions.push([r, c]);
+    });
+  });
+  return positions;
+};
+
+const move = (grid: Grid, direction: string): { grid: Grid; score: number; moved: boolean; mergedPositions: [number, number][] } => {
   let g = grid;
   const rotations: Record<string, number> = { left: 0, up: 1, right: 2, down: 3 };
   const rot = rotations[direction];
   for (let i = 0; i < rot; i++) g = rotateGrid(g);
   const result = slideLeft(g);
   for (let i = 0; i < (4 - rot) % 4; i++) result.grid = rotateGrid(result.grid);
-  return result;
+  const mergedPositions = transformMergedPositions(result.mergedCols, rot);
+  return { grid: result.grid, score: result.score, moved: result.moved, mergedPositions };
 };
 
 const canMove = (grid: Grid): boolean => {
@@ -96,20 +121,21 @@ export const use2048 = ({ onMove, onMerge, onWin, onGameOver }: Use2048Props = {
   const [state, setState] = useState<GameState>(() => {
     const bestScore = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
     let grid = createEmptyGrid();
-    grid = addRandomTile(addRandomTile(grid));
-    return { grid, score: 0, bestScore, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0 };
+    const first = addRandomTile(grid);
+    const second = addRandomTile(first.grid);
+    return { grid: second.grid, score: 0, bestScore, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0, newTilePos: second.pos, mergedPositions: [] };
   });
 
   const handleMove = useCallback((direction: string) => {
     setState(prev => {
       if (prev.gameOver || (prev.won && !prev.keepPlaying)) return prev;
-      const { grid: newGrid, score: addedScore, moved } = move(prev.grid, direction);
+      const { grid: newGrid, score: addedScore, moved, mergedPositions } = move(prev.grid, direction);
       if (!moved) return prev;
       
       onMove?.();
       if (addedScore > 0) onMerge?.(addedScore);
       
-      const gridWithNew = addRandomTile(newGrid);
+      const { grid: gridWithNew, pos: newTilePos } = addRandomTile(newGrid);
       const newScore = prev.score + addedScore;
       const newBest = Math.max(newScore, prev.bestScore);
       
@@ -121,7 +147,7 @@ export const use2048 = ({ onMove, onMerge, onWin, onGameOver }: Use2048Props = {
       const gameOver = !canMove(gridWithNew);
       if (gameOver) onGameOver?.();
       
-      return { ...prev, grid: gridWithNew, score: newScore, bestScore: newBest, won: prev.won || won, gameOver, prevGrid: prev.grid, prevScore: prev.score };
+      return { ...prev, grid: gridWithNew, score: newScore, bestScore: newBest, won: prev.won || won, gameOver, prevGrid: prev.grid, prevScore: prev.score, newTilePos, mergedPositions };
     });
   }, [onMove, onMerge, onWin, onGameOver]);
 
@@ -131,8 +157,9 @@ export const use2048 = ({ onMove, onMerge, onWin, onGameOver }: Use2048Props = {
 
   const reset = useCallback(() => {
     let grid = createEmptyGrid();
-    grid = addRandomTile(addRandomTile(grid));
-    setState(prev => ({ ...prev, grid, score: 0, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0 }));
+    const first = addRandomTile(grid);
+    const second = addRandomTile(first.grid);
+    setState(prev => ({ ...prev, grid: second.grid, score: 0, gameOver: false, won: false, keepPlaying: false, prevGrid: null, prevScore: 0, newTilePos: second.pos, mergedPositions: [] }));
   }, []);
 
   const continuePlaying = useCallback(() => {
