@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTetris } from './useTetris';
 import { useAudio } from './useAudio';
 import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
 const Tetris: React.FC = () => {
+  const { isMuted, toggleMusic, playLineClear } = useAudio();
+  
+  const handleLineClear = useCallback((lineCount: number) => {
+    playLineClear(lineCount);
+  }, [playLineClear]);
+
   const { 
     gameState, 
     ghostY, 
@@ -15,14 +21,14 @@ const Tetris: React.FC = () => {
     togglePause, 
     toggleGhost,
     resetGame 
-  } = useTetris();
-  const { isMuted, toggleMusic } = useAudio();
-  const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused } = gameState;
+  } = useTetris({ onLineClear: handleLineClear });
+  
+  const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused, clearingLines } = gameState;
 
   // Create display board with ghost and current piece
   const displayBoard = board.map(row => [...row]);
   
-  // Draw ghost piece first (so current piece draws on top)
+  // Draw ghost piece first
   if (currentPiece && ghostY !== null && ghostY !== currentPiece.position.y) {
     for (let y = 0; y < currentPiece.shape.length; y++) {
       for (let x = 0; x < currentPiece.shape[y].length; x++) {
@@ -68,6 +74,8 @@ const Tetris: React.FC = () => {
     }
     return { backgroundColor: cell };
   };
+
+  const isLineClearing = (rowIndex: number) => clearingLines.includes(rowIndex);
 
   return (
     <div className="tetris-container">
@@ -135,7 +143,7 @@ const Tetris: React.FC = () => {
               row.map((cell, x) => (
                 <div
                   key={`${y}-${x}`}
-                  className={`tetris-cell ${cell && !cell.startsWith('ghost:') ? 'filled' : ''} ${cell?.startsWith('ghost:') ? 'ghost' : ''}`}
+                  className={`tetris-cell ${cell && !cell.startsWith('ghost:') ? 'filled' : ''} ${cell?.startsWith('ghost:') ? 'ghost' : ''} ${isLineClearing(y) ? 'clearing' : ''}`}
                   style={getCellStyle(cell)}
                 />
               ))

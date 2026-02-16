@@ -64,9 +64,26 @@ const BASS = [
 export const useAudio = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
+  const sfxGainRef = useRef<GainNode | null>(null);
   const isPlayingRef = useRef(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isMuted, setIsMuted] = useState(true);
+
+  const getAudioContext = useCallback(async () => {
+    if (!audioContextRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
+    }
+    if (audioContextRef.current.state === 'suspended') {
+      await audioContextRef.current.resume();
+    }
+    if (!sfxGainRef.current) {
+      sfxGainRef.current = audioContextRef.current.createGain();
+      sfxGainRef.current.connect(audioContextRef.current.destination);
+      sfxGainRef.current.gain.value = 0.3;
+    }
+    return audioContextRef.current;
+  }, []);
 
   const createOscillator = useCallback((
     ctx: AudioContext,
@@ -96,6 +113,54 @@ export const useAudio = () => {
     osc.stop(startTime + duration);
   }, []);
 
+  // Line clear sound effect - 8-bit celebration sound
+  const playLineClear = useCallback(async (lineCount: number = 1) => {
+    try {
+      const ctx = await getAudioContext();
+      if (!sfxGainRef.current) return;
+
+      const now = ctx.currentTime;
+      
+      // Different sounds based on line count
+      if (lineCount >= 4) {
+        // TETRIS! - Epic arpeggio
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1046.50, 783.99, 659.25];
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.4, now + i * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.05 + 0.15);
+          osc.connect(gain);
+          gain.connect(sfxGainRef.current!);
+          osc.start(now + i * 0.05);
+          osc.stop(now + i * 0.05 + 0.15);
+        });
+      } else {
+        // Normal line clear - quick ascending beeps
+        const baseNotes = [440, 554.37, 659.25];
+        for (let line = 0; line < lineCount; line++) {
+          baseNotes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = freq * (1 + line * 0.2);
+            const startTime = now + line * 0.12 + i * 0.04;
+            gain.gain.setValueAtTime(0.3, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.1);
+            osc.connect(gain);
+            gain.connect(sfxGainRef.current!);
+            osc.start(startTime);
+            osc.stop(startTime + 0.1);
+          });
+        }
+      }
+    } catch (error) {
+      console.error('SFX error:', error);
+    }
+  }, [getAudioContext]);
+
   const scheduleLoop = useCallback(() => {
     if (!isPlayingRef.current || !audioContextRef.current || !gainNodeRef.current) return;
     
@@ -123,7 +188,6 @@ export const useAudio = () => {
   }, [createOscillator]);
 
   const toggleMusic = useCallback(async () => {
-    // If currently playing, stop it
     if (!isMuted && isPlayingRef.current) {
       isPlayingRef.current = false;
       setIsMuted(true);
@@ -137,38 +201,27 @@ export const useAudio = () => {
       return;
     }
 
-    // Start playing - must happen in user gesture context
     try {
-      // Create or get AudioContext
-      if (!audioContextRef.current) {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        audioContextRef.current = new AudioContextClass();
-      }
+      const ctx = await getAudioContext();
 
-      // Resume if suspended (required for iOS)
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      // Create gain node if needed
       if (!gainNodeRef.current) {
-        gainNodeRef.current = audioContextRef.current.createGain();
-        gainNodeRef.current.connect(audioContextRef.current.destination);
+        gainNodeRef.current = ctx.createGain();
+        gainNodeRef.current.connect(ctx.destination);
       }
       
       gainNodeRef.current.gain.value = 0.15;
       isPlayingRef.current = true;
       setIsMuted(false);
       
-      // Start the loop
       scheduleLoop();
     } catch (error) {
       console.error('Audio initialization failed:', error);
     }
-  }, [isMuted, scheduleLoop]);
+  }, [isMuted, getAudioContext, scheduleLoop]);
 
   return {
     isMuted,
     toggleMusic,
+    playLineClear,
   };
 };

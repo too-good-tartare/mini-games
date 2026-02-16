@@ -20,4 +20,5 @@ export interface GameState {
   level: number;
   gameOver: boolean;
   isPaused: boolean;
+  clearingLines: number[]; // Row indices being cleared
 }

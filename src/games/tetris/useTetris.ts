@@ -27,7 +27,11 @@ const rotate = (matrix: number[][]): number[][] => {
   return rotated;
 };
 
-export const useTetris = () => {
+interface UseTetrisProps {
+  onLineClear?: (lineCount: number) => void;
+}
+
+export const useTetris = ({ onLineClear }: UseTetrisProps = {}) => {
   const [gameState, setGameState] = useState<GameState>({
     board: createEmptyBoard(),
     currentPiece: null,
@@ -37,13 +41,14 @@ export const useTetris = () => {
     level: 1,
     gameOver: false,
     isPaused: false,
+    clearingLines: [],
   });
   
   const [showGhost, setShowGhost] = useState(true);
-  
-  // Use ref to avoid resetting the game loop on every state change
   const gameStateRef = useRef(gameState);
+  const onLineClearRef = useRef(onLineClear);
   gameStateRef.current = gameState;
+  onLineClearRef.current = onLineClear;
 
   const isValidMove = useCallback((piece: Piece, board: Board): boolean => {
     for (let y = 0; y < piece.shape.length; y++) {
@@ -75,19 +80,22 @@ export const useTetris = () => {
     return newBoard;
   }, []);
 
-  const clearLines = useCallback((board: Board): { newBoard: Board; linesCleared: number } => {
-    let linesCleared = 0;
-    const newBoard = board.filter(row => {
+  const findCompleteLines = useCallback((board: Board): number[] => {
+    const lines: number[] = [];
+    board.forEach((row, index) => {
       if (row.every(cell => cell !== null)) {
-        linesCleared++;
-        return false;
+        lines.push(index);
       }
-      return true;
     });
+    return lines;
+  }, []);
+
+  const removeLines = useCallback((board: Board, lineIndices: number[]): Board => {
+    const newBoard = board.filter((_, index) => !lineIndices.includes(index));
     while (newBoard.length < BOARD_HEIGHT) {
       newBoard.unshift(Array(BOARD_WIDTH).fill(null));
     }
-    return { newBoard, linesCleared };
+    return newBoard;
   }, []);
 
   const calculateScore = (linesCleared: number, level: number): number => {
@@ -111,24 +119,62 @@ export const useTetris = () => {
 
   const lockPiece = useCallback((prev: GameState): GameState => {
     if (!prev.currentPiece) return prev;
+    
     const mergedBoard = mergePieceToBoard(prev.currentPiece, prev.board);
-    const { newBoard, linesCleared } = clearLines(mergedBoard);
-    const newScore = prev.score + calculateScore(linesCleared, prev.level);
-    const newLines = prev.lines + linesCleared;
-    const newLevel = Math.floor(newLines / 10) + 1;
+    const completeLines = findCompleteLines(mergedBoard);
+    
+    if (completeLines.length > 0) {
+      // Trigger sound effect
+      if (onLineClearRef.current) {
+        onLineClearRef.current(completeLines.length);
+      }
+      
+      // Start clearing animation
+      return {
+        ...prev,
+        board: mergedBoard,
+        currentPiece: null,
+        clearingLines: completeLines,
+      };
+    }
+    
+    // No lines to clear
     return {
       ...prev,
-      board: newBoard,
+      board: mergedBoard,
       currentPiece: null,
-      score: newScore,
-      lines: newLines,
-      level: newLevel,
     };
-  }, [mergePieceToBoard, clearLines]);
+  }, [mergePieceToBoard, findCompleteLines]);
+
+  // Handle clearing animation completion
+  useEffect(() => {
+    if (gameState.clearingLines.length > 0) {
+      const timer = setTimeout(() => {
+        setGameState(prev => {
+          const newBoard = removeLines(prev.board, prev.clearingLines);
+          const linesCleared = prev.clearingLines.length;
+          const newScore = prev.score + calculateScore(linesCleared, prev.level);
+          const newLines = prev.lines + linesCleared;
+          const newLevel = Math.floor(newLines / 10) + 1;
+          
+          return {
+            ...prev,
+            board: newBoard,
+            clearingLines: [],
+            score: newScore,
+            lines: newLines,
+            level: newLevel,
+          };
+        });
+      }, 300); // Animation duration
+      
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.clearingLines, removeLines]);
 
   const movePiece = useCallback((dx: number, dy: number) => {
     setGameState(prev => {
-      if (!prev.currentPiece || prev.gameOver || prev.isPaused) return prev;
+      if (!prev.currentPiece || prev.gameOver || prev.isPaused || prev.clearingLines.length > 0) return prev;
       const newPiece: Piece = {
         ...prev.currentPiece,
         position: {
@@ -148,13 +194,12 @@ export const useTetris = () => {
 
   const rotatePiece = useCallback(() => {
     setGameState(prev => {
-      if (!prev.currentPiece || prev.gameOver || prev.isPaused) return prev;
+      if (!prev.currentPiece || prev.gameOver || prev.isPaused || prev.clearingLines.length > 0) return prev;
       const rotatedShape = rotate(prev.currentPiece.shape);
       const newPiece: Piece = { ...prev.currentPiece, shape: rotatedShape };
       if (isValidMove(newPiece, prev.board)) {
         return { ...prev, currentPiece: newPiece };
       }
-      // Wall kick attempts
       for (const kick of [-1, 1, -2, 2]) {
         const kickedPiece: Piece = {
           ...newPiece,
@@ -178,28 +223,39 @@ export const useTetris = () => {
 
   const hardDrop = useCallback(() => {
     setGameState(prev => {
-      if (!prev.currentPiece || prev.gameOver || prev.isPaused) return prev;
+      if (!prev.currentPiece || prev.gameOver || prev.isPaused || prev.clearingLines.length > 0) return prev;
       const ghostY = getGhostPosition(prev.currentPiece, prev.board);
       const dropDistance = ghostY - prev.currentPiece.position.y;
       const droppedPiece: Piece = { 
         ...prev.currentPiece, 
         position: { ...prev.currentPiece.position, y: ghostY } 
       };
+      
       const mergedBoard = mergePieceToBoard(droppedPiece, prev.board);
-      const { newBoard, linesCleared } = clearLines(mergedBoard);
-      const newScore = prev.score + calculateScore(linesCleared, prev.level) + dropDistance * 2;
-      const newLines = prev.lines + linesCleared;
-      const newLevel = Math.floor(newLines / 10) + 1;
+      const completeLines = findCompleteLines(mergedBoard);
+      
+      if (completeLines.length > 0) {
+        if (onLineClearRef.current) {
+          onLineClearRef.current(completeLines.length);
+        }
+        
+        return {
+          ...prev,
+          board: mergedBoard,
+          currentPiece: null,
+          clearingLines: completeLines,
+          score: prev.score + dropDistance * 2,
+        };
+      }
+      
       return {
         ...prev,
-        board: newBoard,
+        board: mergedBoard,
         currentPiece: null,
-        score: newScore,
-        lines: newLines,
-        level: newLevel,
+        score: prev.score + dropDistance * 2,
       };
     });
-  }, [getGhostPosition, mergePieceToBoard, clearLines]);
+  }, [getGhostPosition, mergePieceToBoard, findCompleteLines]);
 
   const togglePause = useCallback(() => {
     setGameState(prev => ({ ...prev, isPaused: !prev.isPaused }));
@@ -219,32 +275,33 @@ export const useTetris = () => {
       level: 1,
       gameOver: false,
       isPaused: false,
+      clearingLines: [],
     });
   }, []);
 
   // Spawn piece when needed
   useEffect(() => {
-    if (!gameState.currentPiece && !gameState.gameOver) {
+    if (!gameState.currentPiece && !gameState.gameOver && gameState.clearingLines.length === 0) {
       spawnPiece();
     }
-  }, [gameState.currentPiece, gameState.gameOver, spawnPiece]);
+  }, [gameState.currentPiece, gameState.gameOver, gameState.clearingLines, spawnPiece]);
 
-  // Game loop - using ref to prevent reset on piece changes
+  // Game loop
   useEffect(() => {
-    if (gameState.gameOver || gameState.isPaused) return;
+    if (gameState.gameOver || gameState.isPaused || gameState.clearingLines.length > 0) return;
     
     const speed = Math.max(100, 1000 - (gameState.level - 1) * 100);
     
     const tick = () => {
       const current = gameStateRef.current;
-      if (current.currentPiece && !current.gameOver && !current.isPaused) {
+      if (current.currentPiece && !current.gameOver && !current.isPaused && current.clearingLines.length === 0) {
         movePiece(0, 1);
       }
     };
     
     const interval = setInterval(tick, speed);
     return () => clearInterval(interval);
-  }, [gameState.gameOver, gameState.isPaused, gameState.level, movePiece]);
+  }, [gameState.gameOver, gameState.isPaused, gameState.level, gameState.clearingLines, movePiece]);
 
   // Keyboard controls
   useEffect(() => {
@@ -253,6 +310,8 @@ export const useTetris = () => {
         if (e.key === 'Enter') resetGame();
         return;
       }
+      if (gameState.clearingLines.length > 0) return;
+      
       switch (e.key) {
         case 'ArrowLeft':
           e.preventDefault();
@@ -288,9 +347,8 @@ export const useTetris = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.gameOver, movePiece, rotatePiece, hardDrop, togglePause, toggleGhost, resetGame]);
+  }, [gameState.gameOver, gameState.clearingLines, movePiece, rotatePiece, hardDrop, togglePause, toggleGhost, resetGame]);
 
-  // Calculate ghost piece position
   const ghostY = gameState.currentPiece && showGhost
     ? getGhostPosition(gameState.currentPiece, gameState.board)
     : null;
