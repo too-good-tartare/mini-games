@@ -1,0 +1,150 @@
+.game2048-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 70px 15px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.game2048-header {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.game2048-header h1 {
+  font-size: 48px;
+  color: #edc22e;
+  margin: 0 0 10px;
+}
+
+.scores {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.score-box {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 8px 20px;
+  text-align: center;
+}
+
+.score-box .label {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+}
+
+.score-box .value {
+  display: block;
+  font-size: 22px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.game2048-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.game2048-controls button {
+  padding: 10px 20px;
+  font-size: 14px;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.game2048-controls button:disabled {
+  opacity: 0.4;
+}
+
+.game2048-board {
+  position: relative;
+  width: min(85vw, 400px);
+  aspect-ratio: 1;
+  background: #bbada0;
+  border-radius: 8px;
+  padding: 8px;
+  touch-action: none;
+}
+
+.grid-bg {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  height: 100%;
+}
+
+.cell-bg {
+  background: rgba(238,228,218,0.35);
+  border-radius: 4px;
+}
+
+.tiles {
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(24px, 8vw, 45px);
+  font-weight: bold;
+  border-radius: 4px;
+  animation: pop 0.15s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.game2048-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.overlay-content {
+  text-align: center;
+  color: #fff;
+}
+
+.overlay-content h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.overlay-content button {
+  margin: 10px 5px 0;
+  padding: 12px 25px;
+  font-size: 16px;
+  background: #edc22e;
+  border: none;
+  border-radius: 8px;
+  color: #776e65;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.game2048-instructions {
+  margin-top: 15px;
+  color: #888;
+  font-size: 13px;
+}

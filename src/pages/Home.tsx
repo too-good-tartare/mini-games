@@ -23,7 +23,7 @@ const games: GameCard[] = [
     name: '2048',
     emoji: '🔢',
     description: '숫자 합치기 퍼즐',
-    available: false,
+    available: true,
   },
   {
     id: 'fruit-ninja',
