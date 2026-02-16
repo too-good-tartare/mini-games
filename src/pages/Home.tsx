@@ -46,11 +46,13 @@ const Home: React.FC = () => {
         {games.map((game) => (
           <div key={game.id} className={`game-card ${!game.available ? 'coming-soon' : ''}`}>
             <div className="game-emoji">{game.emoji}</div>
-            <h3>{game.name}</h3>
-            <p>{game.description}</p>
+            <div className="game-info">
+              <h3>{game.name}</h3>
+              <p>{game.description}</p>
+            </div>
             {game.available ? (
               <Link to={`/${game.id}`} className="play-btn">
-                플레이
+                ▶
               </Link>
             ) : (
               <span className="coming-soon-badge">Coming Soon</span>

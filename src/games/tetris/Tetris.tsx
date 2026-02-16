@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTetris } from './useTetris';
-import { BOARD_WIDTH, BOARD_HEIGHT, CELL_SIZE, TETROMINOS } from './constants';
+import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
 const Tetris: React.FC = () => {
@@ -27,42 +27,67 @@ const Tetris: React.FC = () => {
 
   return (
     <div className="tetris-container">
-      <div className="tetris-game">
-        <div className="tetris-left">
-          <div className="tetris-info">
-            <div className="info-item">
-              <span className="info-label">점수</span>
-              <span className="info-value">{score.toLocaleString()}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">라인</span>
-              <span className="info-value">{lines}</span>
-            </div>
-            <div className="info-item">
-              <span className="info-label">레벨</span>
-              <span className="info-value">{level}</span>
-            </div>
+      {/* Mobile: Stats row */}
+      <div className="tetris-stats-row">
+        <div className="stat-box">
+          <span className="stat-label">점수</span>
+          <span className="stat-value">{score.toLocaleString()}</span>
+        </div>
+        <div className="stat-box">
+          <span className="stat-label">라인</span>
+          <span className="stat-value">{lines}</span>
+        </div>
+        <div className="stat-box">
+          <span className="stat-label">레벨</span>
+          <span className="stat-value">{level}</span>
+        </div>
+      </div>
+
+      {/* Mobile: Next piece row */}
+      <div className="next-piece-row">
+        <span className="next-label">다음</span>
+        <div className="next-piece-grid">
+          {nextPieceShape.shape.map((row, y) =>
+            row.map((cell, x) => (
+              <div
+                key={`next-${y}-${x}`}
+                className={`next-cell ${cell ? 'filled' : ''}`}
+                style={{ backgroundColor: cell ? nextPieceShape.color : 'transparent' }}
+              />
+            ))
+          )}
+        </div>
+      </div>
+
+      <div className="tetris-game-wrapper">
+        {/* Desktop sidebar left */}
+        <div className="tetris-sidebar">
+          <div className="stat-box-desktop">
+            <span className="stat-label">점수</span>
+            <span className="stat-value">{score.toLocaleString()}</span>
+          </div>
+          <div className="stat-box-desktop">
+            <span className="stat-label">라인</span>
+            <span className="stat-value">{lines}</span>
+          </div>
+          <div className="stat-box-desktop">
+            <span className="stat-label">레벨</span>
+            <span className="stat-value">{level}</span>
           </div>
         </div>
 
+        {/* Game Board */}
         <div className="tetris-board-wrapper">
-          <div
-            className="tetris-board"
-            style={{
-              width: BOARD_WIDTH * CELL_SIZE,
-              height: BOARD_HEIGHT * CELL_SIZE,
-            }}
-          >
+          <button className="pause-btn" onClick={togglePause}>
+            {isPaused ? '▶' : '⏸'}
+          </button>
+          <div className="tetris-board">
             {displayBoard.map((row, y) =>
               row.map((cell, x) => (
                 <div
                   key={`${y}-${x}`}
                   className={`tetris-cell ${cell ? 'filled' : ''}`}
-                  style={{
-                    width: CELL_SIZE,
-                    height: CELL_SIZE,
-                    backgroundColor: cell || 'transparent',
-                  }}
+                  style={{ backgroundColor: cell || 'transparent' }}
                 />
               ))
             )}
@@ -73,16 +98,15 @@ const Tetris: React.FC = () => {
               <div className="overlay-content">
                 {gameOver ? (
                   <>
-                    <h2>게임 오버!</h2>
-                    <p>점수: {score.toLocaleString()}</p>
+                    <h2>🎮 게임 오버</h2>
+                    <p>최종 점수: {score.toLocaleString()}</p>
+                    <p>클리어 라인: {lines}</p>
                     <button onClick={resetGame}>다시 하기</button>
-                    <p className="hint">또는 Enter 키</p>
                   </>
                 ) : (
                   <>
-                    <h2>일시 정지</h2>
+                    <h2>⏸ 일시 정지</h2>
                     <button onClick={togglePause}>계속하기</button>
-                    <p className="hint">또는 P 키</p>
                   </>
                 )}
               </div>
@@ -90,27 +114,25 @@ const Tetris: React.FC = () => {
           )}
         </div>
 
-        <div className="tetris-right">
-          <div className="next-piece-container">
-            <span className="info-label">다음 블록</span>
+        {/* Desktop sidebar right */}
+        <div className="tetris-sidebar">
+          <div className="next-piece-desktop">
+            <span className="next-label">다음 블록</span>
             <div className="next-piece-grid">
               {nextPieceShape.shape.map((row, y) =>
                 row.map((cell, x) => (
                   <div
-                    key={`next-${y}-${x}`}
+                    key={`next-d-${y}-${x}`}
                     className={`next-cell ${cell ? 'filled' : ''}`}
-                    style={{
-                      backgroundColor: cell ? nextPieceShape.color : 'transparent',
-                    }}
+                    style={{ backgroundColor: cell ? nextPieceShape.color : 'transparent' }}
                   />
                 ))
               )}
             </div>
           </div>
-
-          <div className="tetris-controls">
-            <span className="info-label">조작법</span>
-            <div className="controls-list">
+          <div className="desktop-controls">
+            <div className="ctrl-title">조작법</div>
+            <div className="ctrl-list">
               <div>← → 이동</div>
               <div>↑ 회전</div>
               <div>↓ 빠르게</div>
@@ -123,16 +145,24 @@ const Tetris: React.FC = () => {
 
       {/* Mobile Controls */}
       <div className="mobile-controls">
-        <div className="mobile-row">
-          <button className="mobile-btn" onClick={rotatePiece}>↻</button>
+        <div className="controls-row">
+          <button className="ctrl-btn primary wide" onClick={rotatePiece}>
+            ↻ 회전
+          </button>
+          <button className="ctrl-btn primary wide" onClick={hardDrop}>
+            ⤓ 드롭
+          </button>
         </div>
-        <div className="mobile-row">
-          <button className="mobile-btn" onClick={() => movePiece(-1, 0)}>←</button>
-          <button className="mobile-btn" onClick={hardDrop}>⤓</button>
-          <button className="mobile-btn" onClick={() => movePiece(1, 0)}>→</button>
-        </div>
-        <div className="mobile-row">
-          <button className="mobile-btn" onClick={() => movePiece(0, 1)}>↓</button>
+        <div className="controls-row">
+          <button className="ctrl-btn" onClick={() => movePiece(-1, 0)}>
+            ◀
+          </button>
+          <button className="ctrl-btn" onClick={() => movePiece(0, 1)}>
+            ▼
+          </button>
+          <button className="ctrl-btn" onClick={() => movePiece(1, 0)}>
+            ▶
+          </button>
         </div>
       </div>
     </div>
