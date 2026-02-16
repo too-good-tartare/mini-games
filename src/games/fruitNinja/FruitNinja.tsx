@@ -5,6 +5,16 @@ import './FruitNinja.css';
 
 const STORAGE_KEY = 'fruit-ninja-best';
 
+// 색상 밝기 조절 헬퍼
+const shadeColor = (color: string, percent: number): string => {
+  const num = parseInt(color.replace('#', ''), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.max(0, Math.min(255, (num >> 16) + amt));
+  const G = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amt));
+  const B = Math.max(0, Math.min(255, (num & 0x0000FF) + amt));
+  return `#${(0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1)}`;
+};
+
 let nextId = 0;
 
 const FruitNinja: React.FC = () => {
@@ -225,25 +235,173 @@ const FruitNinja: React.FC = () => {
       ctx.translate(fruit.x, fruit.y);
       ctx.rotate(fruit.rotation);
       
-      // 과일/폭탄 그리기 (원형)
-      ctx.beginPath();
-      ctx.arc(0, 0, fruit.radius, 0, Math.PI * 2);
-      ctx.fillStyle = fruit.type.color;
-      ctx.fill();
+      const r = fruit.radius;
       
-      // 하이라이트
-      ctx.beginPath();
-      ctx.arc(-fruit.radius * 0.3, -fruit.radius * 0.3, fruit.radius * 0.25, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.fill();
-      
-      // 폭탄 표시
       if (fruit.isBomb) {
-        ctx.fillStyle = '#ff4444';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('💣', 0, 0);
+        // 폭탄 그리기
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#2d3436';
+        ctx.fill();
+        
+        // 폭탄 하이라이트
+        ctx.beginPath();
+        ctx.arc(-r * 0.25, -r * 0.25, r * 0.15, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+        ctx.fill();
+        
+        // 심지
+        ctx.beginPath();
+        ctx.moveTo(0, -r);
+        ctx.quadraticCurveTo(r * 0.3, -r * 1.3, r * 0.1, -r * 1.5);
+        ctx.strokeStyle = '#a17f1a';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        
+        // 불꽃
+        ctx.beginPath();
+        ctx.arc(r * 0.1, -r * 1.55, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff6b35';
+        ctx.fill();
+      } else {
+        // 과일별 그리기
+        const name = fruit.type.name;
+        
+        if (name === 'watermelon') {
+          // 수박 - 녹색 껍질 + 빨간 속
+          const grad = ctx.createRadialGradient(0, 0, r * 0.6, 0, 0, r);
+          grad.addColorStop(0, '#ff6b6b');
+          grad.addColorStop(0.7, '#ee5253');
+          grad.addColorStop(0.85, '#fff');
+          grad.addColorStop(1, '#2ed573');
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 줄무늬
+          ctx.strokeStyle = '#1e8449';
+          ctx.lineWidth = 2;
+          for (let i = -2; i <= 2; i++) {
+            ctx.beginPath();
+            ctx.arc(0, 0, r, Math.PI * (0.3 + i * 0.15), Math.PI * (0.7 + i * 0.15));
+            ctx.stroke();
+          }
+        } else if (name === 'orange') {
+          // 오렌지
+          const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
+          grad.addColorStop(0, '#ffa502');
+          grad.addColorStop(1, '#e67e22');
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 텍스처 점
+          ctx.fillStyle = 'rgba(255,255,255,0.15)';
+          for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            ctx.beginPath();
+            ctx.arc(Math.cos(angle) * r * 0.5, Math.sin(angle) * r * 0.5, 3, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        } else if (name === 'apple') {
+          // 사과
+          const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
+          grad.addColorStop(0, '#ff6b6b');
+          grad.addColorStop(1, '#c0392b');
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 잎
+          ctx.beginPath();
+          ctx.ellipse(r * 0.15, -r * 0.9, r * 0.35, r * 0.15, Math.PI * 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = '#27ae60';
+          ctx.fill();
+          // 줄기
+          ctx.beginPath();
+          ctx.moveTo(0, -r * 0.7);
+          ctx.lineTo(0, -r * 1.1);
+          ctx.strokeStyle = '#5d4e37';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        } else if (name === 'grape') {
+          // 포도
+          const positions = [[0, 0], [-r*0.4, -r*0.3], [r*0.4, -r*0.3], [-r*0.2, r*0.35], [r*0.2, r*0.35], [0, -r*0.55]];
+          positions.forEach(([x, y]) => {
+            const grad = ctx.createRadialGradient(x - 4, y - 4, 0, x, y, r * 0.35);
+            grad.addColorStop(0, '#a55eea');
+            grad.addColorStop(1, '#6c3483');
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.32, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+          });
+          // 줄기
+          ctx.beginPath();
+          ctx.moveTo(0, -r * 0.8);
+          ctx.lineTo(0, -r * 1.2);
+          ctx.strokeStyle = '#5d4e37';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else if (name === 'lemon') {
+          // 레몬
+          ctx.beginPath();
+          ctx.ellipse(0, 0, r * 1.1, r * 0.8, 0, 0, Math.PI * 2);
+          const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.2, 0, 0, 0, r);
+          grad.addColorStop(0, '#fff200');
+          grad.addColorStop(1, '#f1c40f');
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 끝 점
+          ctx.beginPath();
+          ctx.arc(r * 0.95, 0, 4, 0, Math.PI * 2);
+          ctx.arc(-r * 0.95, 0, 4, 0, Math.PI * 2);
+          ctx.fillStyle = '#d4ac0d';
+          ctx.fill();
+        } else if (name === 'strawberry') {
+          // 딸기
+          ctx.beginPath();
+          ctx.moveTo(0, -r * 0.8);
+          ctx.quadraticCurveTo(-r, -r * 0.3, -r * 0.7, r * 0.6);
+          ctx.quadraticCurveTo(0, r * 1.1, r * 0.7, r * 0.6);
+          ctx.quadraticCurveTo(r, -r * 0.3, 0, -r * 0.8);
+          const grad = ctx.createRadialGradient(0, r * 0.2, 0, 0, 0, r);
+          grad.addColorStop(0, '#ff6b6b');
+          grad.addColorStop(1, '#c0392b');
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 씨앗
+          ctx.fillStyle = '#f1c40f';
+          const seeds = [[-r*0.3, 0], [r*0.3, 0], [0, r*0.4], [-r*0.2, r*0.5], [r*0.2, r*0.5]];
+          seeds.forEach(([x, y]) => {
+            ctx.beginPath();
+            ctx.ellipse(x, y, 3, 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          // 잎
+          ctx.beginPath();
+          ctx.moveTo(-r * 0.4, -r * 0.7);
+          ctx.lineTo(0, -r * 0.5);
+          ctx.lineTo(r * 0.4, -r * 0.7);
+          ctx.lineTo(0, -r * 1);
+          ctx.closePath();
+          ctx.fillStyle = '#27ae60';
+          ctx.fill();
+        } else {
+          // 기본 (키위, 복숭아 등)
+          const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 0, 0, 0, r);
+          grad.addColorStop(0, fruit.type.color);
+          grad.addColorStop(1, shadeColor(fruit.type.color, -30));
+          ctx.beginPath();
+          ctx.arc(0, 0, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          // 하이라이트
+          ctx.beginPath();
+          ctx.arc(-r * 0.3, -r * 0.3, r * 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.3)';
+          ctx.fill();
+        }
       }
       
       ctx.restore();
