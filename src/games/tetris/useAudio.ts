@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 
 // 8-bit style melody notes (frequencies in Hz)
-// Classic Tetris-inspired melody pattern
 const MELODY = [
   { note: 659.25, duration: 0.15 }, // E5
   { note: 493.88, duration: 0.15 }, // B4
@@ -44,7 +43,6 @@ const MELODY = [
   { note: 0, duration: 0.3 },       // Rest
 ];
 
-// Bass line
 const BASS = [
   { note: 164.81, duration: 0.3 },  // E3
   { note: 146.83, duration: 0.3 },  // D3
@@ -67,9 +65,8 @@ export const useAudio = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
   const isPlayingRef = useRef(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted, user must enable
-  const [isPlaying, setIsPlaying] = useState(false);
-  const animationFrameRef = useRef<number | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isMuted, setIsMuted] = useState(true);
 
   const createOscillator = useCallback((
     ctx: AudioContext,
@@ -79,7 +76,7 @@ export const useAudio = () => {
     duration: number,
     type: OscillatorType = 'square'
   ) => {
-    if (frequency === 0) return; // Rest note
+    if (frequency === 0) return;
     
     const osc = ctx.createOscillator();
     const noteGain = ctx.createGain();
@@ -87,7 +84,6 @@ export const useAudio = () => {
     osc.type = type;
     osc.frequency.value = frequency;
     
-    // 8-bit style envelope
     noteGain.gain.setValueAtTime(0, startTime);
     noteGain.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
     noteGain.gain.linearRampToValueAtTime(0.2, startTime + duration * 0.3);
@@ -100,107 +96,79 @@ export const useAudio = () => {
     osc.stop(startTime + duration);
   }, []);
 
-  const playMelody = useCallback(async () => {
-    if (!audioContextRef.current || !gainNodeRef.current) return;
+  const scheduleLoop = useCallback(() => {
+    if (!isPlayingRef.current || !audioContextRef.current || !gainNodeRef.current) return;
     
     const ctx = audioContextRef.current;
     const gainNode = gainNodeRef.current;
+
+    let melodyTime = ctx.currentTime + 0.05;
+    let bassTime = ctx.currentTime + 0.05;
+
+    MELODY.forEach(({ note, duration }) => {
+      createOscillator(ctx, gainNode, note, melodyTime, duration * 2, 'square');
+      melodyTime += duration * 2;
+    });
+
+    BASS.forEach(({ note, duration }) => {
+      createOscillator(ctx, gainNode, note, bassTime, duration * 2, 'triangle');
+      bassTime += duration * 2;
+    });
+
+    const totalDuration = MELODY.reduce((acc, { duration }) => acc + duration * 2, 0);
     
-    if (ctx.state === 'suspended') {
-      await ctx.resume();
-    }
-
-    const playLoop = () => {
-      if (!isPlayingRef.current) return;
-      
-      const currentCtx = audioContextRef.current;
-      const currentGain = gainNodeRef.current;
-      if (!currentCtx || !currentGain) return;
-
-      let melodyTime = currentCtx.currentTime + 0.1;
-      let bassTime = currentCtx.currentTime + 0.1;
-
-      // Schedule melody
-      MELODY.forEach(({ note, duration }) => {
-        createOscillator(currentCtx, currentGain, note, melodyTime, duration * 2, 'square');
-        melodyTime += duration * 2;
-      });
-
-      // Schedule bass
-      BASS.forEach(({ note, duration }) => {
-        createOscillator(currentCtx, currentGain, note, bassTime, duration * 2, 'triangle');
-        bassTime += duration * 2;
-      });
-
-      // Calculate total duration and schedule next loop
-      const totalDuration = MELODY.reduce((acc, { duration }) => acc + duration * 2, 0);
-      
-      setTimeout(() => {
-        if (isPlayingRef.current) {
-          playLoop();
-        }
-      }, totalDuration * 1000);
-    };
-
-    playLoop();
+    timeoutRef.current = setTimeout(() => {
+      scheduleLoop();
+    }, (totalDuration - 0.1) * 1000);
   }, [createOscillator]);
 
-  const initAudio = useCallback(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      gainNodeRef.current = audioContextRef.current.createGain();
-      gainNodeRef.current.connect(audioContextRef.current.destination);
-      gainNodeRef.current.gain.value = 0.15; // Lower volume for background music
-    }
-  }, []);
-
-  const startMusic = useCallback(() => {
-    initAudio();
-    if (!isPlayingRef.current) {
-      isPlayingRef.current = true;
-      setIsPlaying(true);
-      setIsMuted(false);
-      if (gainNodeRef.current) {
-        gainNodeRef.current.gain.value = 0.15;
-      }
-      playMelody();
-    }
-  }, [initAudio, playMelody]);
-
-  const stopMusic = useCallback(() => {
-    isPlayingRef.current = false;
-    setIsPlaying(false);
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-    }
-  }, []);
-
-  const toggleMusic = useCallback(() => {
-    if (isMuted || !isPlaying) {
-      startMusic();
-    } else {
+  const toggleMusic = useCallback(async () => {
+    // If currently playing, stop it
+    if (!isMuted && isPlayingRef.current) {
+      isPlayingRef.current = false;
       setIsMuted(true);
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       if (gainNodeRef.current) {
         gainNodeRef.current.gain.value = 0;
       }
+      return;
     }
-  }, [isMuted, isPlaying, startMusic]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopMusic();
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
+    // Start playing - must happen in user gesture context
+    try {
+      // Create or get AudioContext
+      if (!audioContextRef.current) {
+        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        audioContextRef.current = new AudioContextClass();
       }
-    };
-  }, [stopMusic]);
+
+      // Resume if suspended (required for iOS)
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      // Create gain node if needed
+      if (!gainNodeRef.current) {
+        gainNodeRef.current = audioContextRef.current.createGain();
+        gainNodeRef.current.connect(audioContextRef.current.destination);
+      }
+      
+      gainNodeRef.current.gain.value = 0.15;
+      isPlayingRef.current = true;
+      setIsMuted(false);
+      
+      // Start the loop
+      scheduleLoop();
+    } catch (error) {
+      console.error('Audio initialization failed:', error);
+    }
+  }, [isMuted, scheduleLoop]);
 
   return {
     isMuted,
-    isPlaying,
     toggleMusic,
-    startMusic,
-    stopMusic,
   };
 };
