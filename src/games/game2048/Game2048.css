@@ -100,9 +100,23 @@
   font-size: clamp(24px, 8vw, 45px);
   font-weight: bold;
   border-radius: 4px;
-  animation: pop 0.15s ease;
   width: calc((100% - 24px) / 4);
   height: calc((100% - 24px) / 4);
+  transition: top 0.12s ease-out, left 0.12s ease-out;
+}
+
+.tile.new {
+  animation: pop 0.15s ease;
+}
+
+.tile.merged {
+  animation: merge 0.15s ease;
+}
+
+@keyframes merge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 @keyframes pop {
