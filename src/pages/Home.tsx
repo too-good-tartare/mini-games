@@ -30,7 +30,7 @@ const games: GameCard[] = [
     name: 'Fruit Ninja',
     emoji: '🍉',
     description: '과일 자르기 액션',
-    available: false,
+    available: true,
   },
 ];
 

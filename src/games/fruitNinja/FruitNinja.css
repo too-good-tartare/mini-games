@@ -1,0 +1,131 @@
+.fruit-ninja-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  max-width: 100%;
+  position: relative;
+}
+
+.fruit-ninja-header {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 12px;
+  font-size: 20px;
+}
+
+.fruit-ninja-header .score {
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.fruit-ninja-header .lives {
+  font-size: 18px;
+}
+
+.fruit-ninja-header .best {
+  color: #aaa;
+}
+
+.combo {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 28px;
+  font-weight: bold;
+  color: #ff6b6b;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  animation: comboPopup 0.3s ease-out;
+  z-index: 10;
+}
+
+@keyframes comboPopup {
+  0% { transform: translateX(-50%) scale(1.5); opacity: 0; }
+  100% { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+.fruit-ninja-container canvas {
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  height: auto;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.overlay {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 400px;
+  height: 600px;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.overlay-content {
+  text-align: center;
+  color: white;
+  padding: 24px;
+}
+
+.overlay-content h2 {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.overlay-content p {
+  font-size: 18px;
+  margin: 8px 0;
+  color: #ccc;
+}
+
+.overlay-content button {
+  margin-top: 24px;
+  padding: 14px 36px;
+  font-size: 20px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.overlay-content button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(238, 90, 90, 0.4);
+}
+
+.overlay-content button:active {
+  transform: scale(0.98);
+}
+
+/* 모바일 최적화 */
+@media (max-width: 450px) {
+  .fruit-ninja-container {
+    padding: 8px;
+  }
+  
+  .fruit-ninja-header {
+    font-size: 16px;
+  }
+  
+  .combo {
+    font-size: 22px;
+    top: 60px;
+  }
+  
+  .overlay {
+    top: 40px;
+  }
+}
