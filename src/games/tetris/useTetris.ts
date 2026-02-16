@@ -29,9 +29,10 @@ const rotate = (matrix: number[][]): number[][] => {
 
 interface UseTetrisProps {
   onLineClear?: (lineCount: number) => void;
+  onGameOver?: () => void;
 }
 
-export const useTetris = ({ onLineClear }: UseTetrisProps = {}) => {
+export const useTetris = ({ onLineClear, onGameOver }: UseTetrisProps = {}) => {
   const [gameState, setGameState] = useState<GameState>({
     board: createEmptyBoard(),
     currentPiece: null,
@@ -47,8 +48,10 @@ export const useTetris = ({ onLineClear }: UseTetrisProps = {}) => {
   const [showGhost, setShowGhost] = useState(true);
   const gameStateRef = useRef(gameState);
   const onLineClearRef = useRef(onLineClear);
+  const onGameOverRef = useRef(onGameOver);
   gameStateRef.current = gameState;
   onLineClearRef.current = onLineClear;
+  onGameOverRef.current = onGameOver;
 
   const isValidMove = useCallback((piece: Piece, board: Board): boolean => {
     for (let y = 0; y < piece.shape.length; y++) {
@@ -107,6 +110,7 @@ export const useTetris = ({ onLineClear }: UseTetrisProps = {}) => {
     setGameState(prev => {
       const newPiece = createPiece(prev.nextPiece);
       if (!isValidMove(newPiece, prev.board)) {
+        if (onGameOverRef.current) onGameOverRef.current();
         return { ...prev, gameOver: true };
       }
       return {

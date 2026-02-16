@@ -5,11 +5,15 @@ import { BOARD_WIDTH, BOARD_HEIGHT, TETROMINOS } from './constants';
 import './Tetris.css';
 
 const Tetris: React.FC = () => {
-  const { isMuted, toggleMusic, playLineClear } = useAudio();
+  const { isMuted, toggleMusic, playLineClear, playGameOver } = useAudio();
   
   const handleLineClear = useCallback((lineCount: number) => {
     playLineClear(lineCount);
   }, [playLineClear]);
+
+  const handleGameOver = useCallback(() => {
+    playGameOver();
+  }, [playGameOver]);
 
   const { 
     gameState, 
@@ -21,7 +25,7 @@ const Tetris: React.FC = () => {
     togglePause, 
     toggleGhost,
     resetGame 
-  } = useTetris({ onLineClear: handleLineClear });
+  } = useTetris({ onLineClear: handleLineClear, onGameOver: handleGameOver });
   
   const { board, currentPiece, nextPiece, score, lines, level, gameOver, isPaused, clearingLines } = gameState;
 

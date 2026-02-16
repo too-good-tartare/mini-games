@@ -219,9 +219,54 @@ export const useAudio = () => {
     }
   }, [isMuted, getAudioContext, scheduleLoop]);
 
+  // Game over sound effect - sad descending tone
+  const playGameOver = useCallback(async () => {
+    try {
+      const ctx = await getAudioContext();
+      if (!sfxGainRef.current) return;
+
+      const now = ctx.currentTime;
+      
+      // Descending sad tones
+      const notes = [440, 392, 349.23, 293.66, 261.63, 220, 196, 174.61];
+      
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = freq;
+        
+        const startTime = now + i * 0.12;
+        gain.gain.setValueAtTime(0.35, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.25);
+        
+        osc.connect(gain);
+        gain.connect(sfxGainRef.current!);
+        osc.start(startTime);
+        osc.stop(startTime + 0.25);
+      });
+
+      // Final low buzz
+      const buzzOsc = ctx.createOscillator();
+      const buzzGain = ctx.createGain();
+      buzzOsc.type = 'sawtooth';
+      buzzOsc.frequency.value = 80;
+      buzzGain.gain.setValueAtTime(0.3, now + 1);
+      buzzGain.gain.exponentialRampToValueAtTime(0.01, now + 1.8);
+      buzzOsc.connect(buzzGain);
+      buzzGain.connect(sfxGainRef.current!);
+      buzzOsc.start(now + 1);
+      buzzOsc.stop(now + 1.8);
+      
+    } catch (error) {
+      console.error('Game over SFX error:', error);
+    }
+  }, [getAudioContext]);
+
   return {
     isMuted,
     toggleMusic,
     playLineClear,
+    playGameOver,
   };
 };
