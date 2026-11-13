@@ -287,7 +287,7 @@ function beginDock(){
 function tryFit(){
  if(layoutBlocked)return;let distance=Math.hypot(tile.x-targetPos.x,tile.y-targetPos.y);if(distance>40)return;
  fit=Geometry.score(solid,targetMask).fit;
- if(fit>=.971&&distance<27&&clearTilePath(tile,targetPos))beginDock();else status('벽에 닿는 부분을 덜어내요');
+ if(fit>=.90&&distance<27&&clearTilePath(tile,targetPos))beginDock();else status('벽에 닿는 부분을 덜어내요');
 }
 function finishIntro(){phase='play';syncPenMode();tile={...home};$('#skip').hidden=true;idleStatus();$('#undo').disabled=!history.length}
 function maskEdges(mask){
