@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f3e9">
+<title>틈, 맞춤 — 마지막 한 장</title>
+<style>
+:root{--paper:#f6f3e9;--ink:#35483f;--muted:#9b9f90;--line:#e4e3d8;--accent:#bf785c;--green:#3e594c}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}body{font-family:'Avenir Next','Apple SD Gothic Neo',sans-serif;background:#e3e6da;color:var(--ink);user-select:none;-webkit-user-select:none}button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}button:disabled{opacity:.28;cursor:default}button svg{pointer-events:none}svg{display:block}button{border:0;background:none;padding:0}.app{width:100%;max-width:480px;height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--paper);position:relative;margin:auto}.topbar{flex:0 0 auto;padding:calc(8px + env(safe-area-inset-top)) 16px 4px;display:flex;justify-content:space-between;align-items:center;min-height:58px;z-index:2;background:var(--paper)}.brand{display:flex;align-items:center;gap:9px;font-size:21px;font-weight:800;letter-spacing:-1.2px}.mark{width:22px;height:22px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;transform:rotate(-7deg)}.mark i{background:var(--green);border-radius:2px}.mark i:last-child{background:var(--accent);transform:translate(2px,2px)}.header-actions{display:flex;gap:2px}.icon-btn{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;color:#71806c}.icon-btn:active{background:#e7e9dc}.icon-btn svg{width:19px;height:19px}.question{font-size:17px;font-weight:500}.levelbar{display:flex;align-items:center;justify-content:space-between;flex:0 0 43px;padding:0 17px 4px;position:relative;z-index:2}.level-name{font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;letter-spacing:-.2px}.level-number{font-size:10px;font-weight:700;color:var(--accent);background:#eee4d8;padding:4px 6px;border-radius:5px}.level-right{display:flex;align-items:center;gap:10px}.levels{display:flex;gap:0}.level-dot{width:25px;height:36px;display:grid;place-items:center}.level-dot:before{content:'';height:5px;width:5px;background:#d3d7c9;border-radius:50%;transition:.2s}.level-dot.active:before{background:var(--green);width:18px;border-radius:4px}.level-dot.done:before{background:#9aaa8b}.level-dot.active.done:before{background:var(--green)}.hint-btn{width:34px;height:36px;display:grid;place-items:center;border-left:1px solid #e0e3d6;padding-left:10px}.hint-btn svg{width:18px;height:18px;color:#8b967e}.hint-btn.on svg{color:var(--accent)}.playfield{flex:1;min-height:0;position:relative;isolation:isolate;overflow:hidden;background:#e8e1d0}#game{display:block;width:100%;height:100%;touch-action:none;outline:none}.skip{position:absolute;right:14px;top:8px;font-size:10px;min-height:36px;color:#8a8271;padding:0 12px;background:#fcf9edc9;border-radius:20px}.skip[hidden]{display:none}.bottom{flex:0 0 auto;background:var(--paper);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -1px #c6c6ad44;z-index:3}.context{height:40px;display:flex;align-items:center;justify-content:center;position:relative;margin:0 16px}.status{font-size:11px;color:#8f967f;letter-spacing:-.1px;text-align:center;line-height:1.3}.toast{position:absolute;left:50%;bottom:calc(57px + env(safe-area-inset-bottom));transform:translate(-50%,8px);background:#3a5146ee;color:#fffcf4;font-size:11px;padding:10px 16px;border-radius:20px;box-shadow:0 5px 15px #35483f15;opacity:0;pointer-events:none;white-space:nowrap;transition:.2s;z-index:9;max-width:94%}.toast.show{opacity:1;transform:translate(-50%,0)}.success{position:absolute;inset:0;z-index:6;display:flex;justify-content:center;align-items:end;padding:24px 22px;background:linear-gradient(transparent 20%,#eceee17a);animation:appear .35s ease}.success[hidden],.sheet[hidden]{display:none}.success-card{border:1px solid #fafff2;background:#fffdf3f5;box-shadow:0 10px 40px #344c3926;border-radius:20px;padding:23px;width:100%;max-width:330px;text-align:center;backdrop-filter:blur(10px)}.success-card .check{margin:0 auto 12px;display:grid;place-items:center;background:#e7edde;color:#67815a;width:38px;height:38px;border-radius:50%}.check svg{width:20px;height:20px}.success-card h1{font-size:27px;font-weight:700;letter-spacing:-1.4px;margin:0 0 5px}.success-card p{font-size:11px;color:#9aa18a;margin:0 0 19px}.primary{height:47px;width:100%;border-radius:10px;background:var(--green);color:#fffdf1;display:flex;justify-content:center;align-items:center;gap:17px;font-size:12px}.primary svg{width:16px;height:16px}.sheet{position:absolute;inset:0;background:#293d3566;backdrop-filter:blur(4px);display:flex;align-items:end;z-index:20}.sheet-card{width:100%;padding:10px 26px calc(27px + env(safe-area-inset-bottom));background:var(--paper);border-radius:24px 24px 0 0;box-shadow:0 -15px 60px #253a351a;animation:appear .2s}.sheet-handle{width:32px;height:4px;background:#d6dbcb;border-radius:10px;margin:2px auto 23px}.sheet-card h2{font-size:21px;letter-spacing:-1px;margin:0 0 24px}.help-step{display:flex;align-items:center;gap:17px;margin:21px 0}.help-step>span{display:grid;place-items:center;height:39px;width:39px;border-radius:11px;background:#e7ebdd;color:#768a68;flex-shrink:0}.help-step svg{width:21px;height:21px}.help-step b{font-size:13px;font-weight:500;display:block;margin-bottom:4px}.help-step p{font-size:11px;color:#999f8c;margin:0;line-height:1.6}.sheet-options{margin:26px 0 19px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:15px}.sound-control{height:36px;font-size:11px;display:flex;gap:8px;align-items:center;color:#89957c}.sound-control svg{width:17px;height:17px}.restart-control{height:36px;font-size:11px;color:#a57d65}@keyframes appear{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(min-width:600px){body{display:grid;place-items:center;background:radial-gradient(ellipse at 30% 20%,#edf0e5,#d9dfd0)}.app{height:min(920px,calc(100dvh - 40px));border-radius:26px;box-shadow:0 16px 70px #3d51491a,0 0 0 1px #c6cebc77}.topbar{padding-top:8px}}@media(max-height:690px){.topbar{min-height:51px;padding-top:4px}.levelbar{flex-basis:36px}.context{height:34px}.toast{bottom:calc(50px + env(safe-area-inset-bottom))}.success-card{padding:19px}.success-card h1{font-size:24px}}
+</style>
+</head>
+<body>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="i-tile" viewBox="0 0 24 24"><path d="M5 3h10v6h6v12H3V3zM15 3l6 6"/><path d="M7 9v8h8" opacity=".35"/></symbol>
+<symbol id="i-ruler" viewBox="0 0 24 24"><path d="m3 16 13-13 5 5L8 21zM12.5 6.5l2 2M9.5 9.5l3 3M6.5 12.5l2 2"/></symbol>
+<symbol id="i-pen" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l5-1L21 7a2.1 2.1 0 0 0-4-4L5 15zM5 15l4 4"/></symbol>
+<symbol id="i-undo" viewBox="0 0 24 24"><path d="m8 5-5 5 5 5M3 10h10a6 6 0 0 1 0 12" transform="translate(1 -2)"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.5 7M4 4v6h6"/></symbol>
+<symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 8a6 6 0 0 1 0 8M20 5a10 10 0 0 1 0 14"/></symbol>
+<symbol id="i-muted" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4zM17 9l5 6M22 9l-5 6"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 19h6M10 22h4M8 13a6 6 0 1 1 8 0c-1 1-1 2-1 3H9c0-1 0-2-1-3Z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+<symbol id="i-hand" viewBox="0 0 24 24"><path d="M8 12V5a2 2 0 0 1 4 0v5-6a2 2 0 0 1 4 0v7-5a2 2 0 0 1 4 0v9c0 4-3 7-7 7-3 0-5-2-7-4l-4-5c-1-2 1-3 3-2l3 3"/></symbol>
+</defs></svg>
+<div class="app">
+<header class="topbar"><div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>틈, 맞춤</div><div class="header-actions"><button class="icon-btn" id="undo" aria-label="되돌리기" disabled><svg fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-undo"/></svg></button><button class="icon-btn" id="reset" aria-label="다시 시작"><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-reset"/></svg></button><button class="icon-btn question" id="help" aria-label="조작법">?</button></div></header>
+<div class="levelbar"><div class="level-name"><span class="level-number" id="level-number">01</span><span id="level-title">벽 모서리</span></div><div class="level-right"><nav class="levels" aria-label="스테이지"><button class="level-dot active" data-stage="0" aria-label="1 벽 모서리"></button><button class="level-dot" data-stage="1" aria-label="2 사선 벽"></button><button class="level-dot" data-stage="2" aria-label="3 기둥 옆"></button><button class="level-dot" data-stage="3" aria-label="4 두 모서리"></button></nav><button class="hint-btn" id="hint" aria-label="재단선 힌트" aria-pressed="false"><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-bulb"/></svg></button></div></div>
+<main class="playfield" id="playfield"><canvas id="game" tabindex="0" aria-label="위쪽은 벽과 깔린 타일 사이의 빈자리, 아래쪽은 재단할 타일입니다. 화면의 타일, 자, 펜을 직접 끌어 조작하세요. 닫힌 조각 위에 올리면 제거 영역을 보여줍니다."></canvas><button class="skip" id="skip">건너뛰기</button><div class="success" id="success" hidden><div class="success-card"><div class="check"><svg fill="none" stroke="currentColor" stroke-width="1.8"><use href="#i-check"/></svg></div><h1>딱 맞았다!</h1><p id="success-detail">마지막 한 장, 완성.</p><button class="primary" id="next">다음 타일 <svg fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-arrow"/></svg></button></div></div></main>
+<footer class="bottom"><div class="context"><span class="status" id="status" role="status">타일·자·펜을 바로 잡아보세요</span></div></footer>
+<div class="toast" id="toast" role="status"></div>
+<div class="sheet" id="help-sheet" hidden><section class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="help-title"><div class="sheet-handle"></div><h2 id="help-title">마지막 한 장을 맞춰요.</h2><div class="help-step"><span><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-ruler"/></svg></span><div><b>자를 대고</b><p>화면의 자를 직접 끌어요. 끝점은 회전.</p></div></div><div class="help-step"><span><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-pen"/></svg></span><div><b>선을 그어요</b><p>빨간 펜을 잡고 자의 밝은 변을 따라 쓱.</p></div></div><div class="help-step"><span><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-hand"/></svg></span><div><b>톡 떼고, 착 끼워요</b><p>조각 위에서 미리 보고 탭. 타일은 빈자리로.</p></div></div><div class="sheet-options"><button class="sound-control" id="sound"><svg fill="none" stroke="currentColor" stroke-width="1.5"><use href="#i-sound"/></svg><span id="sound-label">소리 켜짐</span></button><button class="restart-control" id="sheet-reset">이 스테이지 다시</button></div><button class="primary" id="close-help">시작할게요</button></section></div>
+</div>
+<script>
+/* Mobile gameplay POC. No dependencies, network requests or persisted state. */
+'use strict';
+const N=280, W=420;
+let H=640, S=210, sceneBottom=300;
+const stages=[
+ {name:'벽 모서리',path:[[0,0],[.6,0],[.6,.4],[1,.4],[1,1],[0,1]],hints:[[[.6,0],[.6,.4]],[[.6,.4],[1,.4]]]},
+ {name:'사선 벽',path:[[0,0],[.45,0],[1,.55],[1,1],[0,1]],hints:[[[.45,0],[1,.55]]]},
+ {name:'기둥 옆',path:[[0,0],[1,0],[1,.3],[.6,.3],[.6,.7],[1,.7],[1,1],[0,1]],hints:[[[.6,.3],[1,.3]],[[.6,.3],[.6,.7]],[[.6,.7],[1,.7]]]},
+ {name:'두 모서리',path:[[0,0],[.65,0],[.65,.3],[1,.3],[1,1],[.3,1],[.3,.7],[0,.7]],hints:[[[.65,0],[.65,.3]],[[.65,.3],[1,.3]],[[0,.7],[.3,.7]],[[.3,.7],[.3,1]]]}
+];
+const Geometry={
+ inside(x,y,poly){let v=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){let a=poly[i],b=poly[j];if((a[1]>y)!=(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])v=!v}return v},
+ target(poly){let m=new Uint8Array(N*N);for(let y=0;y<N;y++)for(let x=0;x<N;x++)m[y*N+x]=this.inside((x+.5)/N,(y+.5)/N,poly)?1:0;return m},
+ regions(solid,lines){let barrier=new Uint8Array(N*N);for(const l of lines){let dx=l[2]-l[0],dy=l[3]-l[1],steps=Math.ceil(Math.hypot(dx,dy)*2);for(let k=0;k<=steps;k++){let x=Math.round(l[0]+dx*k/steps),y=Math.round(l[1]+dy*k/steps);for(let oy=-1;oy<=1;oy++)for(let ox=-1;ox<=1;ox++){let px=x+ox,py=y+oy;if(px>=0&&px<N&&py>=0&&py<N)barrier[py*N+px]=1}}}let labels=new Int32Array(N*N);labels.fill(-1);let regions=[],queue=new Int32Array(N*N);for(let i=0;i<solid.length;i++){if(!solid[i]||barrier[i]||labels[i]>=0)continue;let id=regions.length,head=0,tail=0,sumX=0,sumY=0;queue[tail++]=i;labels[i]=id;while(head<tail){let p=queue[head++],x=p%N,y=(p/N)|0;sumX+=x;sumY+=y;for(let q of [x>0?p-1:-1,x<N-1?p+1:-1,y>0?p-N:-1,y<N-1?p+N:-1])if(q>=0&&solid[q]&&!barrier[q]&&labels[q]<0){labels[q]=id;queue[tail++]=q}}regions.push({size:tail,x:sumX/tail,y:sumY/tail})}return{labels,regions,barrier}},
+ score(solid,target){let intersection=0,union=0,area=0;for(let i=0;i<solid.length;i++){if(solid[i]&&target[i])intersection++;if(solid[i]||target[i])union++;area+=solid[i]}return{fit:union?intersection/union:0,area:area/(N*N)}},
+ clip(a,b){let dx=b.x-a.x,dy=b.y-a.y,t0=0,t1=1;for(let [p,q] of [[-dx,a.x],[dx,N-1-a.x],[-dy,a.y],[dy,N-1-a.y]]){if(Math.abs(p)<1e-8){if(q<0)return null}else{let r=q/p;if(p<0)t0=Math.max(t0,r);else t1=Math.min(t1,r);if(t0>t1)return null}}if(Math.hypot(dx*(t1-t0),dy*(t1-t0))<3)return null;return[a.x+dx*t0,a.y+dy*t0,a.x+dx*t1,a.y+dy*t1]}
+};
+const $=s=>document.querySelector(s), canvas=$('#game'), ctx=canvas.getContext('2d');
+let targetPos={x:93,y:44}, home={x:105,y:375}, tile={...home};
+let stage=0, completed=new Set(), solid, lines=[], seg, targetMask;
+let phase='intro', cuts=0, removed=0, history=[], hint=false;
+let ruler={x:210,y:590,angle:0}, pen={x:380,y:520,angle:-.28}, penReturn=null;
+let drag=null, stroke=null, hover=-1, pointer={x:-100,y:-100};
+let pointers=new Map(), gesture=null, particles=[];
+let materialEdges=[], materialSamples=[], wallMask=null, roomRefs=[];
+let snapGuides=[], snapUntil=0, snapKey='', previewMask=null, previewOutline=[];
+const previewCanvas=document.createElement('canvas'), previewCtx=previewCanvas.getContext('2d');previewCanvas.width=previewCanvas.height=N;
+let introStart=0, animationStart=0, animationFrom=null, fit=0, toastTimer;
+let sound=true, audio=null, lastTime=0, ready=false, backdropDirty=true;
+const tileCanvas=document.createElement('canvas'), tctx=tileCanvas.getContext('2d');
+const maskCanvas=document.createElement('canvas'), mctx=maskCanvas.getContext('2d');
+const texture=document.createElement('canvas'), plaster=document.createElement('canvas');
+const backdrop=document.createElement('canvas'), bg=backdrop.getContext('2d');
+for(const c of [tileCanvas,maskCanvas,texture,plaster]){c.width=N;c.height=N}
+function random(seed){return()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}}
+function makeTextures(){
+ const r=random(713), g=texture.getContext('2d');
+ g.fillStyle='#a6b8aa';g.fillRect(0,0,N,N);
+ const colors=['#e9e7ce','#718e7c','#d6c5a0','#dce2cd','#819c88','#f0eddb'];
+ for(let i=0;i<560;i++){let x=r()*N,y=r()*N,s=.8+r()*3.5;g.fillStyle=colors[(r()*colors.length)|0];g.beginPath();g.moveTo(x,y);g.lineTo(x+s*(.5+r()),y+s*.2);g.lineTo(x+s*.8,y+s*(.8+r()));g.lineTo(x-s*.4,y+s*.5);g.closePath();g.fill()}
+ let gradient=g.createLinearGradient(0,0,N,N);gradient.addColorStop(0,'#ffffff14');gradient.addColorStop(1,'#395c4309');g.fillStyle=gradient;g.fillRect(0,0,N,N);
+ const p=plaster.getContext('2d');p.fillStyle='#d9c9b8';p.fillRect(0,0,N,N);
+ for(let i=0;i<16000;i++){p.fillStyle=r()>.5?'#aa8f7310':'#fff9eb26';p.fillRect(r()*N,r()*N,.6+r(),.6+r())}
+}
+makeTextures();
+function poly(g,points,x=0,y=0,size=1){g.beginPath();points.forEach((p,i)=>i?g.lineTo(x+p[0]*size,y+p[1]*size):g.moveTo(x+p[0]*size,y+p[1]*size));g.closePath()}
+function label(g,s,x,y,size=10,color='#8e957e',align='left',weight='400'){
+ g.font=`${weight} ${size}px "Avenir Next", "Apple SD Gothic Neo", sans-serif`;g.fillStyle=color;g.textAlign=align;g.fillText(s,x,y);g.textAlign='left';
+}
+function wallPolys(){
+ const x=targetPos.x,y=targetPos.y,s=S,b=sceneBottom;
+ if(stage===0)return[[[0,0],[W,0],[W,y+s*.4],[x+s*.6,y+s*.4],[x+s*.6,y],[0,y]]];
+ if(stage===1)return[[[0,0],[W,0],[W,y+s*.55],[x+s,y+s*.55],[x+s*.45,y],[0,y]]];
+ if(stage===2)return[[[0,0],[W,0],[W,b],[x+s,b],[x+s,y+s*.7],[x+s*.6,y+s*.7],[x+s*.6,y+s*.3],[x+s,y+s*.3],[x+s,y],[0,y]]];
+ return[[[0,0],[W,0],[W,y+s*.3],[x+s*.65,y+s*.3],[x+s*.65,y],[0,y]],[[0,y+s*.7],[x+s*.3,y+s*.7],[x+s*.3,b],[0,b]]];
+}
+function paintBackdrop(){
+ const scale=2;backdrop.width=W*scale;backdrop.height=Math.ceil(H*scale);bg.setTransform(scale,0,0,scale,0,0);
+ // A real floor: matching full tiles, one missing cell, and solid walls.
+ bg.fillStyle='#d9ddcc';bg.fillRect(0,0,W,sceneBottom);
+ bg.save();bg.beginPath();bg.rect(0,0,W,sceneBottom);bg.clip();
+ for(let row=-1;row<4;row++)for(let col=-2;col<3;col++){
+  let x=targetPos.x+col*S,y=targetPos.y+row*S;
+  if(row===0&&col===0)continue;
+  bg.drawImage(texture,x+1.5,y+1.5,S-3,S-3);
+  bg.fillStyle=(row+col)%2?'#fffcee0a':'#47665206';bg.fillRect(x+1.5,y+1.5,S-3,S-3);
+  bg.strokeStyle='#f4f4dc77';bg.lineWidth=1;bg.strokeRect(x+2,y+2,S-4,S-4);
+  bg.strokeStyle='#6c846050';bg.beginPath();bg.moveTo(x+S-2,y+2);bg.lineTo(x+S-2,y+S-2);bg.lineTo(x+2,y+S-2);bg.stroke();
+ }
+ // Exposed ridged tile adhesive only in the last tile's footprint.
+ poly(bg,stages[stage].path,targetPos.x,targetPos.y,S);bg.save();bg.clip();
+ bg.fillStyle='#a3a696';bg.fillRect(targetPos.x,targetPos.y,S,S);
+ bg.lineWidth=3;bg.strokeStyle='#89917c77';
+ for(let k=-S;k<S*2;k+=7){bg.beginPath();bg.moveTo(targetPos.x+k,targetPos.y);bg.lineTo(targetPos.x+k-S*.25,targetPos.y+S);bg.stroke()}
+ bg.lineWidth=1;bg.strokeStyle='#c9cbb655';
+ for(let k=-S;k<S*2;k+=7){bg.beginPath();bg.moveTo(targetPos.x+k+2,targetPos.y);bg.lineTo(targetPos.x+k-S*.25+2,targetPos.y+S);bg.stroke()}
+ bg.restore();
+ // Walls cover the cuts' negative space and continue outside the missing cell.
+ for(const wall of wallPolys()){
+  bg.save();bg.translate(0,7);poly(bg,wall);bg.shadowColor='#4d5d4055';bg.shadowBlur=9;bg.shadowOffsetY=3;bg.fillStyle='#ab9982';bg.fill();bg.restore();
+  poly(bg,wall);bg.save();bg.clip();bg.fillStyle=bg.createPattern(plaster,'repeat');bg.fillRect(0,0,W,sceneBottom);
+  let light=bg.createLinearGradient(0,0,W,sceneBottom);light.addColorStop(0,'#fffcf31a');light.addColorStop(1,'#a2856e10');bg.fillStyle=light;bg.fillRect(0,0,W,sceneBottom);bg.restore();
+  poly(bg,wall);bg.strokeStyle='#f6e6d2aa';bg.lineWidth=1.2;bg.stroke();
+ }
+ label(bg,'벽',24,26,9,'#aa9680');
+ bg.restore();
+ // Warm plywood below the floor, with a physical front edge.
+ const r=random(221);bg.fillStyle='#e8dfcd';bg.fillRect(0,sceneBottom,W,H-sceneBottom);
+ for(let i=0;i<155;i++){
+  let y=sceneBottom+r()*(H-sceneBottom);bg.strokeStyle=i%3?'#bb9f7720':'#fff7e72f';bg.lineWidth=.35+r()*.7;bg.beginPath();bg.moveTo(-10,y);bg.bezierCurveTo(W*.3,y-4+r()*8,W*.7,y-4+r()*8,W+10,y+r()*3);bg.stroke();
+ }
+ bg.fillStyle='#b3b8a2';bg.fillRect(0,sceneBottom-3,W,3);bg.fillStyle='#98a08733';bg.fillRect(0,sceneBottom,W,5);
+ let edge=bg.createLinearGradient(0,sceneBottom,0,sceneBottom+14);edge.addColorStop(0,'#59694d19');edge.addColorStop(1,'#59694d00');bg.fillStyle=edge;bg.fillRect(0,sceneBottom,W,14);
+ label(bg,'재단',21,sceneBottom+26,9,'#ad9c7e');
+ backdropDirty=false;
+}
+function resize(){
+ const rect=$('#playfield').getBoundingClientRect();if(!rect.width||!rect.height)return;
+ const oldS=S,oldTarget={...targetPos},oldHome={...home},oldTile={...tile};
+ H=rect.height*W/rect.width;S=Math.min(216,Math.max(112,(H-154)/2));
+ targetPos={x:(W-S)/2-11,y:43};sceneBottom=targetPos.y+S+41;home={x:targetPos.x,y:H-S-53};
+ const dpr=Math.min(window.devicePixelRatio||1,2.5);canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);
+ if(ready){
+  const near=Math.hypot(oldTile.x-oldTarget.x,oldTile.y-oldTarget.y)<65;
+  const anchor=near?oldTarget:oldHome,next=near?targetPos:home;
+  tile={x:next.x+(oldTile.x-anchor.x)*S/oldS,y:next.y+(oldTile.y-anchor.y)*S/oldS};
+  ruler.x=tile.x+(ruler.x-oldTile.x)*S/oldS;ruler.y=tile.y+(ruler.y-oldTile.y)*S/oldS;pen={...penPark()};penReturn=null;
+  if(phase==='intro'){tile={...home};introStart=performance.now()}
+  if(phase==='success'||phase==='docking')tile={...targetPos};
+  drag=null;stroke=null;gesture=null;pointers.clear();
+ }else{tile={...home};ruler={x:W/2-15,y:H-26,angle:-.035};pen={...penPark()}}
+ backdropDirty=true;refreshRoom();clearSnap();setPreview(-1);
+}
+function refreshTile(){
+ let data=mctx.createImageData(N,N);
+ for(let i=0;i<solid.length;i++){let j=i*4;data.data[j]=data.data[j+1]=data.data[j+2]=255;data.data[j+3]=solid[i]?255:0}
+ mctx.putImageData(data,0,0);tctx.clearRect(0,0,N,N);tctx.globalCompositeOperation='source-over';tctx.drawImage(texture,0,0);
+ tctx.strokeStyle='#f8f8de88';tctx.lineWidth=2;tctx.strokeRect(1,1,N-2,N-2);
+ tctx.beginPath();for(const l of lines){tctx.moveTo(l[0],l[1]);tctx.lineTo(l[2],l[3])}tctx.lineWidth=1.6;tctx.strokeStyle='#9e5a47';tctx.stroke();
+ tctx.globalCompositeOperation='destination-in';tctx.drawImage(maskCanvas,0,0);tctx.globalCompositeOperation='source-over';
+ seg=Geometry.regions(solid,lines);cacheMaterial();setPreview(-1);$('#undo').disabled=history.length===0||phase!=='play';
+}
+function status(s){$('#status').textContent=s}
+function toast(s){$('#toast').textContent=s;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),2200)}
+function haptic(type){if(navigator.vibrate)navigator.vibrate(type==='success'?[18,40,25]:8)}
+function tone(type){
+ if(!sound)return;
+ try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();let now=audio.currentTime;let notes=type==='success'?[523,659,784]:type==='remove'?[330,220]:type==='cut'?[900,700]:[240];
+ notes.forEach((f,i)=>{let o=audio.createOscillator(),g=audio.createGain();o.type=type==='cut'?'triangle':'sine';o.frequency.value=f;o.connect(g);g.connect(audio.destination);let t=now+i*.08;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(type==='cut'?.018:.045,t+.012);g.gain.exponentialRampToValueAtTime(.001,t+.22);o.start(t);o.stop(t+.25)})}catch{}
+}
+function idleStatus(){status(seg?.regions.length>1?'조각은 톡 · 타일·자·펜은 드래그':'타일·자·펜을 바로 잡아보세요')}
+function initLevel(i,animate=true){
+ stage=i;solid=new Uint8Array(N*N).fill(1);targetMask=Geometry.target(stages[i].path);lines=[];history=[];cuts=removed=0;hover=-1;
+ tile={...home};ruler={x:W/2-15,y:H-26,angle:-.035};pen={...penPark()};penReturn=null;clearSnap();drag=stroke=gesture=null;pointers.clear();particles=[];hint=false;
+ $('#hint').classList.remove('on');$('#hint').setAttribute('aria-pressed','false');$('#success').hidden=true;$('#level-number').textContent=String(i+1).padStart(2,'0');$('#level-title').textContent=stages[i].name;
+ document.querySelectorAll('[data-stage]').forEach(b=>{b.classList.toggle('active',+b.dataset.stage===i);b.classList.toggle('done',completed.has(+b.dataset.stage))});
+ phase=animate?'intro':'play';introStart=performance.now();$('#skip').hidden=!animate;backdropDirty=true;refreshRoom();refreshTile();status(animate?'먼저 대볼게요':'타일·자·펜을 바로 잡아보세요');
+}
+function save(){history.push({solid:solid.slice(),lines:lines.map(l=>l.slice()),cuts,removed});if(history.length>35)history.shift()}
+function undo(){
+ if(!history.length||phase!=='play')return;let s=history.pop();solid=s.solid;lines=s.lines;cuts=s.cuts;removed=s.removed;hover=-1;refreshTile();status('한 단계 되돌렸어요');tone('tap');
+}
+function local(p){return{x:(p.x-tile.x)/S*N,y:(p.y-tile.y)/S*N}}
+function indexAt(p){let q=local(p),x=Math.floor(q.x),y=Math.floor(q.y);return x>=0&&x<N&&y>=0&&y<N?y*N+x:-1}
+function tileHit(p){let i=indexAt(p);return i>=0&&solid[i]}
+function rulerLength(){return Math.min(354,S*1.57+20)}
+function rulerLocal(p){let c=Math.cos(ruler.angle),s=Math.sin(ruler.angle),x=p.x-ruler.x,y=p.y-ruler.y;return{x:x*c+y*s,y:-x*s+y*c}}
+function onRuler(p){let q=rulerLocal(p);return Math.abs(q.x)<rulerLength()/2+10&&Math.abs(q.y)<30}
+function handleHit(p){let q=rulerLocal(p);return Math.hypot(Math.abs(q.x)-(rulerLength()/2-17),q.y)<23}
+function edgePoint(p){let q=rulerLocal(p),c=Math.cos(ruler.angle),s=Math.sin(ruler.angle);return{x:ruler.x+q.x*c+16*s,y:ruler.y+q.x*s-16*c}}
+function point(e){let r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}}
+function removePiece(id){
+ if(seg.regions.length<2||id<0)return;save();let doomed=removalMask(id),center=seg.regions[id];
+ for(let i=0;i<solid.length;i++)if(doomed[i])solid[i]=0;
+ for(let k=0;k<23;k++)particles.push({x:tile.x+center.x/N*S,y:tile.y+center.y/N*S,vx:(Math.random()-.5)*3,vy:(Math.random()-.65)*3,life:1,size:1.5+Math.random()*3,color:k%3?'#a6b8aa':'#dbcaab'});
+ removed++;hover=-1;refreshTile();tone('remove');haptic('remove');status('이제 빈자리에 대볼까요?');
+}
+function finishCut(a,b){
+ let cut=Geometry.clip(local(a),local(b));if(!cut){toast('자와 펜을 타일 위에 대주세요');return}
+ let material=false,steps=Math.max(1,Math.ceil(Math.hypot(cut[2]-cut[0],cut[3]-cut[1])));
+ for(let k=0;k<=steps;k++){let x=Math.max(0,Math.min(N-1,Math.round(cut[0]+(cut[2]-cut[0])*k/steps))),y=Math.max(0,Math.min(N-1,Math.round(cut[1]+(cut[3]-cut[1])*k/steps)));if(solid[y*N+x]){material=true;break}}
+ if(!material)return;
+ save();lines.push(cut);cuts++;hover=-1;refreshTile();tone('cut');haptic('cut');status(seg.regions.length>1?'덜어낼 조각을 톡 눌러요':'선을 이어 조각을 닫아보세요');
+}
+function beginDock(){
+ phase='docking';animationStart=performance.now();animationFrom={...tile};drag=null;stroke=null;fit=Geometry.score(solid,targetMask).fit;
+ setPreview(-1);clearSnap();status('착.');$('#undo').disabled=true;tone('success');haptic('success');
+}
+function tryFit(){
+ let distance=Math.hypot(tile.x-targetPos.x,tile.y-targetPos.y);if(distance>40)return;
+ fit=Geometry.score(solid,targetMask).fit;
+ if(fit>=.971&&distance<27)beginDock();else status('벽에 닿는 부분을 덜어내요');
+}
+function finishIntro(){phase='play';tile={...home};$('#skip').hidden=true;idleStatus();$('#undo').disabled=!history.length}
+function penPark(){return{x:W-34,y:home.y+S*.8,angle:-.28}}
+function maskEdges(mask){
+ const result=[];
+ for(let y=0;y<=N;y++){let start=-1;for(let x=0;x<=N;x++){
+  let edge=x<N&&Boolean(y<N&&mask[y*N+x])!==Boolean(y>0&&mask[(y-1)*N+x]);
+  if(edge&&start<0)start=x;if(!edge&&start>=0){result.push([start,y,x,y]);start=-1}
+ }}
+ for(let x=0;x<=N;x++){let start=-1;for(let y=0;y<=N;y++){
+  let edge=y<N&&Boolean(x<N&&mask[y*N+x])!==Boolean(x>0&&mask[y*N+x-1]);
+  if(edge&&start<0)start=y;if(!edge&&start>=0){result.push([x,start,x,y]);start=-1}
+ }}
+ return result;
+}
+function cacheMaterial(){
+ materialEdges=maskEdges(solid).filter(l=>Math.hypot(l[2]-l[0],l[3]-l[1])>=7);
+ // Include the smooth diagonal guides too; raster steps are intentionally tiny.
+ for(const l of lines){let x=Math.max(0,Math.min(N-1,Math.round((l[0]+l[2])/2))),y=Math.max(0,Math.min(N-1,Math.round((l[1]+l[3])/2))),near=false;
+  for(let oy=-3;oy<=3;oy++)for(let ox=-3;ox<=3;ox++)if(x+ox>=0&&x+ox<N&&y+oy>=0&&y+oy<N&&solid[(y+oy)*N+x+ox])near=true;
+  if(near)materialEdges.push(l.slice());
+ }
+ materialSamples=[];
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(solid[y*N+x]&&((x%16===0&&y%16===0)||x===0||y===0||x===N-1||y===N-1||!solid[y*N+x-1]||!solid[y*N+x+1]||!solid[(y-1)*N+x]||!solid[(y+1)*N+x]))materialSamples.push([(x+.5)/N,(y+.5)/N]);
+}
+function removalMask(id){
+ const labels=seg.labels,doomed=new Uint8Array(N*N);
+ for(let i=0;i<solid.length;i++)if(labels[i]===id)doomed[i]=1;
+ for(let i=0;i<solid.length;i++)if(solid[i]&&seg.barrier[i]){let x=i%N,y=(i/N)|0;
+  for(let oy=-2;oy<=2;oy++)for(let ox=-2;ox<=2;ox++)if(x+ox>=0&&x+ox<N&&y+oy>=0&&y+oy<N&&labels[i+oy*N+ox]===id)doomed[i]=1;
+ }
+ return doomed;
+}
+function setPreview(id){
+ if(id<0||!seg||seg.regions.length<2){hover=-1;previewMask=null;previewOutline=[];return}
+ if(id===hover&&previewMask)return;
+ hover=id;previewMask=removalMask(id);previewOutline=maskEdges(previewMask);
+ let image=previewCtx.createImageData(N,N);
+ for(let i=0;i<previewMask.length;i++)if(previewMask[i]){let j=i*4;image.data[j]=195;image.data[j+1]=109;image.data[j+2]=76;image.data[j+3]=111}
+ previewCtx.putImageData(image,0,0);
+}
+function regionAt(p){
+ if(!seg||seg.regions.length<2)return-1;let q=local(p),x=Math.floor(q.x),y=Math.floor(q.y);
+ if(x<0||y<0||x>=N||y>=N||!solid[y*N+x])return-1;
+ if(seg.labels[y*N+x]>=0)return seg.labels[y*N+x];
+ for(let d=1;d<=3;d++)for(let oy=-d;oy<=d;oy++)for(let ox=-d;ox<=d;ox++){let a=x+ox,b=y+oy;if(a>=0&&a<N&&b>=0&&b<N&&seg.labels[b*N+a]>=0)return seg.labels[b*N+a]}
+ return-1;
+}
+function penLocal(p){let dx=p.x-pen.x,dy=p.y-pen.y,c=Math.cos(pen.angle),s=Math.sin(pen.angle);return{x:dx*c+dy*s,y:-dx*s+dy*c}}
+function penHit(p){let q=penLocal(p);return Math.abs(q.x)<21&&q.y>-85&&q.y<12}
+function objectAt(p){return penHit(p)?'pen':handleHit(p)?'rotate':onRuler(p)?'ruler':tileHit(p)?'tile':null}
+function refreshHover(){
+ if(phase!=='play'||drag)return;let object=objectAt(pointer);setPreview(object==='tile'?regionAt(pointer):-1);
+ canvas.style.cursor=object==='rotate'?'crosshair':object?'grab':'default';
+}
+function refreshRoom(){
+ const walls=wallPolys(),height=Math.ceil(sceneBottom);wallMask=new Uint8Array(W*height);roomRefs=[];
+ for(let y=0;y<height;y++)for(let x=0;x<W;x++)if(walls.some(p=>Geometry.inside(x+.5,y+.5,p)))wallMask[y*W+x]=1;
+ const add=(a,b,kind,id)=>{if(Math.hypot(b.x-a.x,b.y-a.y)>8)roomRefs.push({a,b,kind,id})};
+ walls.forEach((p,i)=>p.forEach((a,j)=>{let b=p[(j+1)%p.length];if(a[1]===0&&b[1]===0)return;add({x:a[0],y:a[1]},{x:b[0],y:b[1]},'벽면',`wall-${i}-${j}`)}));
+ for(let k=-2;k<=2;k++){
+  let x=targetPos.x+k*S,y=targetPos.y+k*S;
+  if(x>0&&x<W)add({x,y:0},{x,y:sceneBottom},'줄눈',`grid-x-${k}`);
+  if(y>0&&y<sceneBottom)add({x:0,y},{x:W,y},'줄눈',`grid-y-${k}`);
+ }
+}
+function tileRefs(){return materialEdges.map((l,i)=>({a:{x:tile.x+l[0]/N*S,y:tile.y+l[1]/N*S},b:{x:tile.x+l[2]/N*S,y:tile.y+l[3]/N*S},kind:'타일 / 재단선',id:`tile-${i}`}))}
+function snapRefs(){
+ let refs=[...tileRefs(),...roomRefs];
+ if(hint)stages[stage].hints.forEach(([a,b],i)=>refs.unshift({a:{x:tile.x+a[0]*S,y:tile.y+a[1]*S},b:{x:tile.x+b[0]*S,y:tile.y+b[1]*S},kind:'힌트선',id:`hint-${i}`}));
+ return refs;
+}
+function clearSnap(){snapGuides=[];snapKey='';snapUntil=0}
+function setSnap(guides,prefix){
+ snapGuides=guides;snapUntil=performance.now()+650;
+ let next=guides.length?prefix+':'+guides.map(g=>g.id).sort().join('|'):'';
+ if(next&&next!==snapKey){haptic('snap');tone('tap')}
+ snapKey=next;if(next)status(`착 · ${guides[0].kind}에 맞았어요`);
+}
+function overlap(a,b,c,d,pad=12){return Math.max(Math.min(a,b),Math.min(c,d))<=Math.min(Math.max(a,b),Math.max(c,d))+pad}
+function alignRuler(raw){
+ const refs=snapRefs();let best=null,bestD=Infinity;
+ for(const ref of refs){
+  let angle=Math.atan2(ref.b.y-ref.a.y,ref.b.x-ref.a.x);angle+=Math.round((raw.angle-angle)/Math.PI)*Math.PI;
+  if(Math.abs(angle-raw.angle)>.075)continue;
+  let c=Math.cos(angle),s=Math.sin(angle),normal={x:-s,y:c};
+  let edge={x:raw.x+16*s,y:raw.y-16*c};
+  let d=(ref.a.x-edge.x)*normal.x+(ref.a.y-edge.y)*normal.y;
+  let locked=snapKey.includes(ref.id),range=locked?13:8;
+  let along=p=>p.x*c+p.y*s,center=along(edge);
+  if(Math.abs(d)>range||!overlap(center-rulerLength()/2,center+rulerLength()/2,along(ref.a),along(ref.b),0))continue;
+  let cost=Math.abs(d)+(ref.kind==='힌트선'?-1:0);
+  if(cost<bestD){bestD=cost;best={...raw,x:raw.x+normal.x*d,y:raw.y+normal.y*d,angle,ref}};
+ }
+ if(best){setSnap([best.ref],'ruler');return{x:best.x,y:best.y,angle:best.angle}}
+ let step=Math.PI/12,nearest=Math.round(raw.angle/step)*step;
+ if(Math.abs(raw.angle-nearest)<.045)raw={...raw,angle:nearest};
+ setSnap([],'ruler');return raw;
+}
+function alignTile(raw){
+ let pos={...raw},guides=[];if(raw.y>sceneBottom+12)return{pos,guides};
+ for(const axis of ['x','y']){
+  let best=null,bestD=Infinity,other=axis==='x'?'y':'x';
+  for(const ref of roomRefs){
+   if(Math.abs(ref.a[axis]-ref.b[axis])>.01)continue;
+   for(const l of materialEdges){
+    let a={x:l[0]/N*S,y:l[1]/N*S},b={x:l[2]/N*S,y:l[3]/N*S};if(Math.abs(a[axis]-b[axis])>.01)continue;
+    let d=ref.a[axis]-raw[axis]-a[axis],limit=snapKey.includes(ref.id)?14:9;
+    if(Math.abs(d)>limit||!overlap(raw[other]+a[other],raw[other]+b[other],ref.a[other],ref.b[other],4))continue;
+    if(Math.abs(d)<bestD){bestD=Math.abs(d);best={ref,d}};
+   }
+  }
+  if(best){pos[axis]+=best.d;guides.push({...best.ref,axis})}
+ }
+ return{pos,guides};
+}
+function wallHit(pos,details=false){
+ if(!wallMask||pos.y>=sceneBottom)return false;
+ for(const [u,v]of materialSamples){let x=Math.floor(pos.x+u*S),y=Math.floor(pos.y+v*S);if(x>=0&&x<W&&y>=0&&y<sceneBottom&&wallMask[y*W+x])return details?{x,y}:true}
+ return false;
+}
+function closestWall(p){
+ let best=null,distance=Infinity;
+ for(const ref of roomRefs){if(ref.kind!=='벽면')continue;let dx=ref.b.x-ref.a.x,dy=ref.b.y-ref.a.y,t=Math.max(0,Math.min(1,((p.x-ref.a.x)*dx+(p.y-ref.a.y)*dy)/(dx*dx+dy*dy))),d=Math.hypot(p.x-ref.a.x-dx*t,p.y-ref.a.y-dy*t);if(d<distance){distance=d;best=ref}}
+ return best;
+}
+function constrainTile(from,to){
+ let pos={...from},contacts=[];
+ // Swept, axis-separated movement prevents tunnelling while still sliding along walls.
+ for(const axis of ['x','y']){
+  let delta=to[axis]-pos[axis],steps=Math.max(1,Math.ceil(Math.abs(delta)/8)),start=pos[axis];
+  for(let i=1;i<=steps;i++){
+   let candidate={...pos,[axis]:start+delta*i/steps};
+   if(!wallHit(candidate)){pos=candidate;continue}
+   let lo=pos[axis],hi=candidate[axis];
+   for(let k=0;k<8;k++){let mid=(lo+hi)/2;if(wallHit({...pos,[axis]:mid}))hi=mid;else lo=mid}
+   pos[axis]=lo;let ref=closestWall(wallHit(candidate,true));if(ref)contacts.push({...ref,axis});break;
+  }
+ }
+ return{pos,contacts};
+}
+function snapInkPoint(p){
+ let projected=edgePoint(p),c=Math.cos(ruler.angle),s=Math.sin(ruler.angle),best=projected,distance=7;
+ for(const ref of tileRefs()){
+  let dx=ref.b.x-ref.a.x,dy=ref.b.y-ref.a.y,den=c*dy-s*dx;
+  if(Math.abs(den)<.0001){for(const q of[ref.a,ref.b]){let d=Math.hypot(q.x-projected.x,q.y-projected.y);if(d<distance){distance=d;best=edgePoint(q)}}continue}
+  let ax=ref.a.x-projected.x,ay=ref.a.y-projected.y,t=(ax*dy-ay*dx)/den,u=(ax*s-ay*c)/den;
+  if(u>=-.01&&u<=1.01&&Math.abs(t)<distance){distance=Math.abs(t);best={x:projected.x+t*c,y:projected.y+t*s}}
+ }
+ return best;
+}
+function updatePen(raw){
+ const q=rulerLocal(raw),projected=snapInkPoint(raw),near=Math.abs(q.y+16)<(stroke?49:23)&&Math.abs(q.x)<rulerLength()/2+13;
+ const overTile=projected.x>=tile.x-8&&projected.x<=tile.x+S+8&&projected.y>=tile.y-8&&projected.y<=tile.y+S+8;
+ if(near&&(overTile||stroke)){
+  pen={...projected,angle:.35};
+  if(!stroke){stroke={a:{...projected},b:{...projected}};status('자를 따라 쓱 그어요')}
+  else stroke.b={...projected};
+ }else{
+  if(stroke){if(Math.hypot(stroke.a.x-stroke.b.x,stroke.a.y-stroke.b.y)>8)finishCut(stroke.a,stroke.b);stroke=null}
+  pen={...raw,angle:.35};
+ }
+}
+function returnPen(){penReturn={start:performance.now(),from:{...pen}}}
+function cancelInteraction(){
+ const isPen=drag?.type==='pen';drag=stroke=gesture=null;pointers.clear();setPreview(-1);clearSnap();if(isPen)returnPen();
+}
+
+function gestureStart(){
+ const p=[...pointers.values()];gesture={middle:{x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2},base:Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x),ruler:{...ruler}};drag=null;stroke=null;
+}
+canvas.addEventListener('pointerdown',e=>{
+ if(e.button!==0||!$('#help-sheet').hidden)return;
+ if(phase==='intro')finishIntro();if(phase!=='play')return;
+ let p=point(e),object=objectAt(p);
+ if(pointers.size){
+  if(drag?.type!=='ruler'&&drag?.type!=='rotate')return;
+  pointers.set(e.pointerId,p);canvas.setPointerCapture(e.pointerId);if(pointers.size===2)gestureStart();return;
+ }
+ e.preventDefault();canvas.focus({preventScroll:true});pointer=p;
+ if(!object){setPreview(-1);return}
+ pointers.set(e.pointerId,p);canvas.setPointerCapture(e.pointerId);canvas.style.cursor='grabbing';
+ if(object==='pen'){
+  penReturn=null;setPreview(-1);clearSnap();drag={type:'pen',start:p,offset:{x:pen.x-p.x,y:pen.y-p.y}};status('빨간 펜을 자의 밝은 변으로 가져가요');
+ }else if(object==='rotate'){
+  setPreview(-1);drag={type:'rotate',start:p,angle:ruler.angle,base:Math.atan2(p.y-ruler.y,p.x-ruler.x),origin:{...ruler}};
+ }else if(object==='ruler'){
+  setPreview(-1);drag={type:'ruler',start:p,origin:{...ruler}};status('가장자리 근처에서는 착 붙어요');
+ }else if(object==='tile'){
+  let id=regionAt(p);setPreview(id);clearSnap();drag={type:'tile',start:p,origin:{...tile},id,moved:false};
+ }
+});
+canvas.addEventListener('pointermove',e=>{
+ if((drag||gesture)&&!pointers.has(e.pointerId))return;
+ pointer=point(e);if(pointers.has(e.pointerId))pointers.set(e.pointerId,pointer);if(phase!=='play')return;
+ if(gesture){
+  if(pointers.size>=2){let p=[...pointers.values()],mid={x:(p[0].x+p[1].x)/2,y:(p[0].y+p[1].y)/2};ruler=alignRuler({x:gesture.ruler.x+mid.x-gesture.middle.x,y:gesture.ruler.y+mid.y-gesture.middle.y,angle:gesture.ruler.angle+Math.atan2(p[1].y-p[0].y,p[1].x-p[0].x)-gesture.base})}
+  return;
+ }
+ if(!drag){refreshHover();return}
+ let p=pointer,dx=p.x-drag.start.x,dy=p.y-drag.start.y;
+ if(drag.type==='tile'){
+  if(Math.hypot(dx,dy)>6)drag.moved=true;if(!drag.moved)return;
+  setPreview(-1);let desired={x:Math.max(0,Math.min(W-S,drag.origin.x+dx)),y:Math.max(0,Math.min(H-S*.4,drag.origin.y+dy))};
+  if(Math.hypot(desired.x-targetPos.x,desired.y-targetPos.y)<27&&Geometry.score(solid,targetMask).fit>=.971){tile=desired;beginDock();return}
+  const aligned=alignTile(desired),limited=constrainTile(tile,aligned.pos);tile=limited.pos;
+  let guides=aligned.guides.filter(g=>Math.abs(tile[g.axis]-aligned.pos[g.axis])<1);setSnap([...limited.contacts,...guides],'tile');
+ }else if(drag.type==='ruler'){
+  ruler=alignRuler({x:Math.max(24,Math.min(W-24,drag.origin.x+dx)),y:Math.max(24,Math.min(H-23,drag.origin.y+dy)),angle:drag.origin.angle});
+ }else if(drag.type==='rotate'){
+  let angle=drag.angle+Math.atan2(p.y-ruler.y,p.x-ruler.x)-drag.base;
+  if(e.shiftKey)angle=Math.round(angle/(Math.PI/12))*Math.PI/12;
+  ruler=alignRuler({...drag.origin,angle});
+ }else if(drag.type==='pen')updatePen({x:p.x+drag.offset.x,y:p.y+drag.offset.y});
+});
+function release(e){
+ if(!pointers.has(e.pointerId))return;
+ pointers.delete(e.pointerId);
+ if(gesture){if(pointers.size===0){gesture=null;idleStatus()}drag=null;return}
+ const d=drag;drag=null;
+ if(d&&phase==='play'){
+  if(d.type==='pen'){
+   if(stroke&&Math.hypot(stroke.a.x-stroke.b.x,stroke.a.y-stroke.b.y)>8)finishCut(stroke.a,stroke.b);
+   else if(!stroke)status('펜촉을 자의 밝은 변에 대고 쓱');
+   stroke=null;returnPen();
+  }else if(d.type==='tile'){
+   if(d.moved)tryFit();else if(d.id>=0)removePiece(d.id);
+  }
+ }
+ snapUntil=performance.now()+650;
+ if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+ refreshHover();
+}
+canvas.addEventListener('pointerup',release);
+canvas.addEventListener('pointercancel',()=>cancelInteraction());
+canvas.addEventListener('lostpointercapture',e=>{if(pointers.has(e.pointerId))cancelInteraction()});
+canvas.addEventListener('pointerleave',()=>{if(!drag){setPreview(-1);pointer={x:-100,y:-100}}});
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+canvas.addEventListener('wheel',e=>{if(phase!=='play'||!onRuler(point(e)))return;e.preventDefault();ruler=alignRuler({...ruler,angle:ruler.angle+Math.sign(e.deltaY)*Math.PI/180*(e.shiftKey?1:5)})},{passive:false});
+for(const b of document.querySelectorAll('[data-stage]'))b.onclick=()=>initLevel(+b.dataset.stage);
+$('#undo').onclick=undo;$('#reset').onclick=()=>initLevel(stage);$('#skip').onclick=finishIntro;
+$('#next').onclick=()=>initLevel((stage+1)%4);
+$('#hint').onclick=()=>{hint=!hint;$('#hint').classList.toggle('on',hint);$('#hint').setAttribute('aria-pressed',String(hint));if(hint)toast('점선을 따라 재단해보세요')};
+$('#help').onclick=()=>{$('#help-sheet').hidden=false;cancelInteraction();$('#close-help').focus()};
+$('#close-help').onclick=()=>{$('#help-sheet').hidden=true;canvas.focus({preventScroll:true})};
+$('#help-sheet').onclick=e=>{if(e.target===$('#help-sheet'))$('#close-help').click()};
+$('#sheet-reset').onclick=()=>{$('#help-sheet').hidden=true;initLevel(stage)};
+$('#sound').onclick=()=>{sound=!sound;$('#sound use').setAttribute('href',sound?'#i-sound':'#i-muted');$('#sound-label').textContent=sound?'소리 켜짐':'소리 꺼짐';if(sound)tone('tap')};
+window.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){$('#help-sheet').hidden=true;cancelInteraction();return}if(!$('#help-sheet').hidden||phase!=='play')return;
+ let k=e.code?.startsWith('Key')?e.code.slice(3).toLowerCase():e.key.toLowerCase();
+ if((e.metaKey||e.ctrlKey)&&k==='z'){e.preventDefault();undo();return}if(e.metaKey||e.ctrlKey||e.altKey)return;
+ if(k==='q'||k==='e'){ruler=alignRuler({...ruler,angle:ruler.angle+(k==='q'?-1:1)*Math.PI/180*(e.shiftKey?1:15)});setPreview(-1)}
+ if(e.key.startsWith('Arrow')){e.preventDefault();let r={...ruler},step=e.shiftKey?10:1;if(k==='arrowleft')r.x-=step;if(k==='arrowright')r.x+=step;if(k==='arrowup')r.y-=step;if(k==='arrowdown')r.y+=step;ruler=alignRuler(r);setPreview(-1)}
+});
+function drawTile(){
+ ctx.save();ctx.translate(tile.x,tile.y);let low=phase==='success'||phase==='docking';
+ ctx.shadowColor='#435b4440';ctx.shadowBlur=low?3:14;ctx.shadowOffsetY=low?1:8;
+ ctx.drawImage(tileCanvas,0,low?1:3,S,S);ctx.shadowColor='transparent';ctx.drawImage(tileCanvas,0,0,S,S);
+ if(previewMask&&phase==='play'&&(!drag||drag.type==='tile'&&!drag.moved)){
+  ctx.drawImage(previewCanvas,0,0,S,S);ctx.strokeStyle='#bc7054';ctx.lineWidth=1.7;ctx.beginPath();
+  for(const l of previewOutline){ctx.moveTo(l[0]/N*S,l[1]/N*S);ctx.lineTo(l[2]/N*S,l[3]/N*S)}ctx.stroke();
+ }
+ if(hint&&phase==='play'){
+  ctx.save();ctx.setLineDash([4,5]);ctx.strokeStyle='#fff9df';ctx.lineWidth=1.6;
+  for(let [a,b] of stages[stage].hints){ctx.beginPath();ctx.moveTo(a[0]*S,a[1]*S);ctx.lineTo(b[0]*S,b[1]*S);ctx.stroke();for(const p of [a,b]){ctx.beginPath();ctx.arc(p[0]*S,p[1]*S,2.7,0,7);ctx.fillStyle='#fff9df';ctx.fill()}}ctx.restore();
+ }
+ ctx.restore();
+ if(previewMask&&phase==='play'&&(!drag||drag.type==='tile'&&!drag.moved)){
+  let r=seg.regions[hover],x=tile.x+r.x/N*S,y=tile.y+r.y/N*S;
+  ctx.beginPath();ctx.arc(x,y,12,0,7);ctx.fillStyle='#bc7054';ctx.fill();ctx.strokeStyle='#fff8e7';ctx.lineWidth=1.6;ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+4,y);ctx.stroke();
+ }
+}
+function drawRuler(){
+ if(phase==='success')return;
+ let len=rulerLength(),end=len/2-17;
+ ctx.save();ctx.translate(ruler.x,ruler.y);ctx.rotate(ruler.angle);
+ ctx.shadowColor='#705f3c30';ctx.shadowBlur=7;ctx.shadowOffsetY=4;
+ ctx.beginPath();ctx.roundRect(-len/2,-16,len,32,4);ctx.fillStyle='#e3be77e6';ctx.fill();ctx.shadowColor='transparent';ctx.strokeStyle='#b3925d88';ctx.lineWidth=.8;ctx.stroke();
+ ctx.fillStyle='#fff3c5cc';ctx.fillRect(-len/2+2,-16,len-4,2.5);
+ for(let x=-Math.floor((len/2-32)/5)*5;x<=len/2-30;x+=5){let major=x%20===0;ctx.strokeStyle=major?'#8d744bbb':'#a3885977';ctx.beginPath();ctx.moveTo(x,-13);ctx.lineTo(x,major?-4:-8);ctx.stroke();if(major)label(ctx,String(Math.round((x+140)/20)),x,5,6.5,'#9b8153','center')}
+ label(ctx,`${((Math.round(ruler.angle*180/Math.PI)%180)+180)%180}°`,0,12,6.5,'#8e754c','center');
+ for(let x of [-end,end]){
+  if(drag?.type==='ruler'||drag?.type==='rotate'||handleHit(pointer)){ctx.beginPath();ctx.arc(x,0,17,0,7);ctx.fillStyle='#fff7da44';ctx.fill()}
+  ctx.beginPath();ctx.arc(x,0,8.5,0,7);ctx.fillStyle='#fff4d4';ctx.fill();ctx.strokeStyle='#b99b66';ctx.lineWidth=1;ctx.stroke();
+  ctx.strokeStyle='#a58d5d';ctx.lineWidth=.8;ctx.beginPath();ctx.arc(x,0,3.7,-2.5,2.2);ctx.stroke();ctx.beginPath();ctx.moveTo(x-1,4.5);ctx.lineTo(x-3.3,2.2);ctx.lineTo(x-.3,1.3);ctx.stroke();
+ }
+ if(drag?.type==='pen'||snapKey.startsWith('ruler:')){ctx.strokeStyle='#fffad5';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-len/2+3,-16);ctx.lineTo(len/2-3,-16);ctx.stroke()}
+ ctx.restore();
+}
+function drawStroke(){
+ if(!stroke)return;ctx.save();ctx.strokeStyle='#9c5745bb';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(stroke.a.x,stroke.a.y);ctx.lineTo(stroke.b.x,stroke.b.y);ctx.stroke();ctx.restore();
+}
+function drawPen(){
+ if(phase==='success')return;
+ ctx.save();ctx.translate(pen.x,pen.y);ctx.rotate(pen.angle);
+ ctx.shadowColor='#66513e42';ctx.shadowBlur=6;ctx.shadowOffsetX=2;ctx.shadowOffsetY=4;
+ ctx.beginPath();ctx.roundRect(-4,-76,8,62,2);ctx.fillStyle='#aa5c46';ctx.fill();ctx.shadowColor='transparent';
+ ctx.fillStyle='#cf8c6d';ctx.fillRect(-2.5,-73,2,58);ctx.fillStyle='#845044';ctx.fillRect(1,-72,2,56);
+ ctx.fillStyle='#e3cf9d';ctx.fillRect(-4,-76,8,5);ctx.fillStyle='#f0d5a2';ctx.beginPath();ctx.moveTo(-4,-14);ctx.lineTo(4,-14);ctx.lineTo(0,0);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#414739';ctx.beginPath();ctx.moveTo(-1.1,-4);ctx.lineTo(1.1,-4);ctx.lineTo(0,0);ctx.closePath();ctx.fill();
+ label(ctx,'TILE / FIT',0,-31,3.8,'#f9d7b9','center');
+ if(!drag&&penHit(pointer)){ctx.strokeStyle='#eac08b99';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(-8,-80,16,85,6);ctx.stroke()}
+ ctx.restore();
+ if(!drag&&!penReturn&&phase==='play')label(ctx,'펜',pen.x,pen.y+18,9,'#ad9675','center');
+}
+function drawSnapGuides(now){
+ if(!snapGuides.length||phase!=='play')return;
+ if(!drag&&now>snapUntil){clearSnap();return}
+ ctx.save();ctx.globalAlpha=drag?1:Math.max(0,(snapUntil-now)/650);ctx.strokeStyle='#537d67';ctx.fillStyle='#eff5de';ctx.lineWidth=1.5;
+ for(const ref of snapGuides){ctx.beginPath();ctx.moveTo(ref.a.x,ref.a.y);ctx.lineTo(ref.b.x,ref.b.y);ctx.stroke();for(const p of[ref.a,ref.b]){ctx.beginPath();ctx.arc(p.x,p.y,2.6,0,7);ctx.fill();ctx.stroke()}}
+ ctx.restore();
+}
+function drawMagnifier(){
+ if(!drag||!['pen','ruler','rotate'].includes(drag.type))return;
+ const focus=stroke?stroke.b:drag.type==='pen'?pen:drag.type==='rotate'?pointer:edgePoint(pointer);
+ let x=Math.max(50,Math.min(W-50,focus.x)),y=focus.y-82;if(y<51)y=focus.y+83;if(y>H-50)y=H-50;
+ ctx.save();ctx.beginPath();ctx.arc(x,y,38,0,7);ctx.shadowColor='#52604733';ctx.shadowBlur=12;ctx.fillStyle='#fdf9e9';ctx.fill();ctx.shadowColor='transparent';ctx.clip();
+ // Use a pre-rendered scene and tile; never sample the magnifier itself.
+ ctx.translate(x,y);ctx.scale(1.9,1.9);ctx.translate(-focus.x,-focus.y);
+ ctx.drawImage(backdrop,0,0,W,H);ctx.drawImage(tileCanvas,tile.x,tile.y,S,S);
+ if(hint){ctx.strokeStyle='#fff8d6';ctx.lineWidth=.8;ctx.setLineDash([2,3]);for(const[a,b]of stages[stage].hints){ctx.beginPath();ctx.moveTo(tile.x+a[0]*S,tile.y+a[1]*S);ctx.lineTo(tile.x+b[0]*S,tile.y+b[1]*S);ctx.stroke()}ctx.setLineDash([])}
+ ctx.strokeStyle='#c1944c';ctx.lineWidth=.7;const c=Math.cos(ruler.angle),s=Math.sin(ruler.angle),e=edgePoint(focus);ctx.beginPath();ctx.moveTo(e.x-c*100,e.y-s*100);ctx.lineTo(e.x+c*100,e.y+s*100);ctx.stroke();ctx.restore();
+ ctx.save();ctx.beginPath();ctx.arc(x,y,38,0,7);ctx.strokeStyle='#fffcf0';ctx.lineWidth=3;ctx.stroke();ctx.strokeStyle='#bf785b';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke();ctx.restore();
+}
+function drawTargetGuide(){
+ if(phase==='intro'||phase==='success')return;
+ const near=Math.hypot(tile.x-targetPos.x,tile.y-targetPos.y)<60;
+ ctx.save();poly(ctx,stages[stage].path,targetPos.x+1,targetPos.y+1,S-2);ctx.setLineDash([4,5]);ctx.strokeStyle=near?'#fff4cf':'#e5e9c488';ctx.lineWidth=near?1.7:1;ctx.stroke();ctx.restore();
+ if(!near){let x=targetPos.x+S*.37,y=targetPos.y+S*.58;ctx.strokeStyle='#e9ead299';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke()}
+}
+function animate(now){
+ const dt=Math.min(2,(now-(lastTime||now))/16.67);lastTime=now;
+ if(phase==='intro'){
+  let t=(now-introStart)/1000,ease=v=>v*v*(3-2*v);
+  if(t<.48){let k=ease(t/.48);tile.x=home.x+(targetPos.x+7-home.x)*k;tile.y=home.y+(targetPos.y+6-home.y)*k}
+  else if(t<1.15){tile.x=targetPos.x+7+Math.sin((t-.48)*23)*3;tile.y=targetPos.y+6+Math.sin((t-.48)*17)*4}
+  else if(t<1.75){let k=ease((t-1.15)/.6);tile.x=targetPos.x+7+(home.x-targetPos.x-7)*k;tile.y=targetPos.y+6+(home.y-targetPos.y-6)*k}
+  else finishIntro();
+ }
+ if(phase==='docking'){
+  let k=Math.min(1,(now-animationStart)/300),e=1-(1-k)**3;tile.x=animationFrom.x+(targetPos.x-animationFrom.x)*e;tile.y=animationFrom.y+(targetPos.y-animationFrom.y)*e;
+  if(k===1){phase='success';completed.add(stage);$('#success-detail').textContent=completed.size===4?'네 개의 틈, 모두 완성.':`정확도 ${Math.min(100,Math.round(fit*100))}% · 마지막 한 장, 완성.`;$('#next').firstChild.textContent=stage===3?'처음부터 ':'다음 타일 ';document.querySelector(`[data-stage="${stage}"]`).classList.add('done');setTimeout(()=>{if(phase==='success'){$('#success').hidden=false;$('#next').focus()}},650)}
+ }
+ if(penReturn){let k=Math.min(1,(now-penReturn.start)/220),e=1-(1-k)**3,dest=penPark();pen.x=penReturn.from.x+(dest.x-penReturn.from.x)*e;pen.y=penReturn.from.y+(dest.y-penReturn.from.y)*e;pen.angle=-.28;if(k===1)penReturn=null}
+ if(backdropDirty)paintBackdrop();ctx.clearRect(0,0,W,H);ctx.drawImage(backdrop,0,0,W,H);drawTargetGuide();drawTile();drawSnapGuides(now);drawRuler();drawStroke();drawPen();
+ for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.06*dt;p.life-=.025*dt;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.life*3);ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);ctx.restore()}ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0);drawMagnifier();requestAnimationFrame(animate);
+}
+resize();ready=true;initLevel(0);new ResizeObserver(()=>resize()).observe($('#playfield'));requestAnimationFrame(animate);
+</script>
+</body>
+</html>

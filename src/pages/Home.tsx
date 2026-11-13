@@ -12,6 +12,13 @@ interface GameCard {
 
 const games: GameCard[] = [
   {
+    id: 'tile-fit',
+    name: '틈, 맞춤',
+    emoji: '📐',
+    description: '재단하고 딱 맞추는 타일 퍼즐',
+    available: true,
+  },
+  {
     id: 'tetris',
     name: '테트리스',
     emoji: '🧱',

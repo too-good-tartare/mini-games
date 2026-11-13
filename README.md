@@ -1,3 +1,13 @@
+# 미니 게임
+
+테트리스, 2048, Fruit Ninja, **틈, 맞춤**을 즐길 수 있는 React 게임 모음입니다.
+
+## 틈, 맞춤
+
+홈에서 ‘틈, 맞춤’을 선택하거나 `/tile-fit`으로 접속합니다. 화면의 타일·자·펜을 직접 끌어 재단하고, 닫힌 조각을 제거한 뒤 빈자리에 맞춥니다. 벽·줄눈 스냅과 제거 영역 미리보기를 지원합니다.
+
+게임 원본은 `public/games/tile-fit/index.html`이며, 별도로 브라우저에서 열어도 실행됩니다. `src/games/tileFit`에서 iframe으로 연결해 다른 게임의 전역 스타일과 입력을 분리합니다. 모바일에서는 상단 메뉴 아래의 남은 화면을 사용합니다.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
